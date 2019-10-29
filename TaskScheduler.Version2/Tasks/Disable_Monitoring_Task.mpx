@@ -1,0 +1,27 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Tasks>
+      <!-- appends _DoNotMonitor to a task's description -->
+      <Task ID="Custom.Windows.ScheduledTaskV2.DisableMonitoring.Task" Accessibility="Internal" Enabled="true" Target="SchTaskLib!Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="false">
+        <Category>Maintenance</Category>
+        <WriteAction ID="Probe" TypeID="Custom.Windows.ScheduledTaskV2.HandlingScriptWA">
+          <TimeoutSeconds>300</TimeoutSeconds>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <Folder>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</Folder>
+          <TaskName>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskName$</TaskName>
+          <Operation>DISABLE</Operation>
+        </WriteAction>
+      </Task>
+    </Tasks>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.DisableMonitoring.Task">
+          <Name>DISABLE Scheduled Task for Monitoring</Name>
+          <Description>Set the "Description" given scheduled task on the agent machine. Appends the disabled flag.</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

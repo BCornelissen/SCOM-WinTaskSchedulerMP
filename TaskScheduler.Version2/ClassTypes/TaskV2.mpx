@@ -1,0 +1,69 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <!-- Task Scheduler 2.0 Classes (Windows Vista and Server 2008) -->
+        <!--     applies through Windows 8.1 and Server 2012 R2)        -->
+        <!-- Generic Class -->
+        <ClassType ID="Custom.TaskScheduler2.Task" Accessibility="Public" Abstract="false" Base="SchTaskLib!Custom.Windows.TaskSchedulerTask" Hosted="true" Singleton="false">
+          <Property ID="TaskAuthor" Type="string" Key="false" CaseSensitive="false" />
+          <Property ID="TaskIsHidden" Type="bool" Key="false" />
+          <!-- enabled / disabled / running etc. -->
+          <Property ID="TaskTriggers" Type="string" Key="false" CaseSensitive="false" />
+          <Property ID="TaskActions" Type="string" Key="false" CaseSensitive="false" MaxLength="4096" />
+          <!-- flag used for monitors and rules in case Windows Tasks were discovered as well -->
+          <Property ID="WinTasksDiscovered" Type="bool" Key="false" />
+        </ClassType>
+        <!-- Tasks with a repetitive schedule -->
+        <ClassType ID="Custom.TaskScheduler2.ScheduledTask" Accessibility="Public" Abstract="false" Base="Custom.TaskScheduler2.Task" Hosted="true" Singleton="false">
+        </ClassType>
+        <!-- group with tasks that contain a MessageAcion: Used as Override target -->
+        <ClassType ID="Custom.TaskScheduler2.Task.ShowMessageAction.Group" Accessibility="Public" Abstract="false" Base="SchTaskLib!Custom.Windows.TaskSchedulerTask.Group" Hosted="false" Singleton="true" />
+
+        <!-- computers that have scheduled tasks discovered -->
+        <!--     used for overrides                         -->
+        <ClassType ID="Custom.TaskScheduler2.Task.ComputerGroup" Accessibility="Internal" Abstract="false" Base="SC!Microsoft.SystemCenter.ComputerGroup" Hosted="false" Singleton="true" />
+      </ClassTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task">
+          <Name>Scheduler 2.0 Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.ScheduledTask">
+          <Name>Scheduler 2.0 Task (time scheduled)</Name>
+        </DisplayString>
+
+        <DisplayString ElementID="Custom.TaskScheduler2.Task" SubElementID="TaskAuthor">
+          <Name>Author</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task" SubElementID="TaskIsHidden">
+          <Name>Hidden</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task" SubElementID="TaskTriggers">
+          <Name>Triggers (Enabled: Type)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task" SubElementID="TaskActions">
+          <Name>Actions (Type: Details)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task" SubElementID="WinTasksDiscovered">
+          <Name>WinD (internal)</Name>
+          <Description>Flag to mark if Windows OS tasks were discovered on this computer. It will be used to configure monitor and rule workflows.</Description>
+        </DisplayString>
+        
+        
+        
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.ShowMessageAction.Group">
+          <Name>Scheduled tasks with ShowMessage action group</Name>
+          <Description>Since the normal return code of a ShowMessage action is '1', this group is the target for an override for the tasks' return code.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.ComputerGroup">
+          <Name>Scheduler 2.0 Task Computer Group</Name>
+          <Description>Contains computers on which Task Scheduler 2.x tasks were discovered (Windows 2008 - 2012 R2)</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

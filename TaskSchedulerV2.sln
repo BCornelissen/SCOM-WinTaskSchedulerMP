@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+VisualStudioVersion = 15.9.17.0
+MinimumVisualStudioVersion = 15.0.0.0
+Project("{D4B43EB3-688B-4EEE-86BD-088F0B28ABB3}") = "Custom.Windows.TaskScheduler.Library", "TaskScheduler.Library\Custom.Windows.TaskScheduler.Library.mpproj", "{6D5A5587-0BBB-471A-AE02-B32CE1CB6739}"
+EndProject
+Project("{D4B43EB3-688B-4EEE-86BD-088F0B28ABB3}") = "Custom.Windows.TaskScheduler.Windows2008.Monitoring", "TaskScheduler.Version2\Custom.Windows.TaskScheduler.Windows2008.Monitoring.mpproj", "{C592B81E-FB70-4379-BD67-1672D5AB638E}"
+EndProject
+Project("{D4B43EB3-688B-4EEE-86BD-088F0B28ABB3}") = "Custom.Windows.TaskScheduler.Windows2008.QuickStartOR", "TaskScheduler.Version2.QuickStartOverride\Custom.Windows.TaskScheduler.Windows2008.QuickStartOR.mpproj", "{F7A6B975-DEF8-46AD-B0CD-B8395E1A9BFB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D5A5587-0BBB-471A-AE02-B32CE1CB6739}.Debug|x86.ActiveCfg = Debug|x86
+		{6D5A5587-0BBB-471A-AE02-B32CE1CB6739}.Debug|x86.Build.0 = Debug|x86
+		{6D5A5587-0BBB-471A-AE02-B32CE1CB6739}.Release|x86.ActiveCfg = Release|x86
+		{6D5A5587-0BBB-471A-AE02-B32CE1CB6739}.Release|x86.Build.0 = Release|x86
+		{C592B81E-FB70-4379-BD67-1672D5AB638E}.Debug|x86.ActiveCfg = Debug|x86
+		{C592B81E-FB70-4379-BD67-1672D5AB638E}.Debug|x86.Build.0 = Debug|x86
+		{C592B81E-FB70-4379-BD67-1672D5AB638E}.Release|x86.ActiveCfg = Release|x86
+		{C592B81E-FB70-4379-BD67-1672D5AB638E}.Release|x86.Build.0 = Release|x86
+		{36B51627-0325-44CD-9E47-F563D3DCF59B}.Debug|x86.ActiveCfg = Debug|x86
+		{36B51627-0325-44CD-9E47-F563D3DCF59B}.Debug|x86.Build.0 = Debug|x86
+		{36B51627-0325-44CD-9E47-F563D3DCF59B}.Release|x86.ActiveCfg = Release|x86
+		{36B51627-0325-44CD-9E47-F563D3DCF59B}.Release|x86.Build.0 = Release|x86
+		{F7A6B975-DEF8-46AD-B0CD-B8395E1A9BFB}.Debug|x86.ActiveCfg = Debug|x86
+		{F7A6B975-DEF8-46AD-B0CD-B8395E1A9BFB}.Debug|x86.Build.0 = Debug|x86
+		{F7A6B975-DEF8-46AD-B0CD-B8395E1A9BFB}.Release|x86.ActiveCfg = Release|x86
+		{F7A6B975-DEF8-46AD-B0CD-B8395E1A9BFB}.Release|x86.Build.0 = Release|x86
+		{AFD6EB21-D19A-40C4-BEFD-7E22F6179E51}.Debug|x86.ActiveCfg = Debug|x86
+		{AFD6EB21-D19A-40C4-BEFD-7E22F6179E51}.Debug|x86.Build.0 = Debug|x86
+		{AFD6EB21-D19A-40C4-BEFD-7E22F6179E51}.Release|x86.ActiveCfg = Release|x86
+		{AFD6EB21-D19A-40C4-BEFD-7E22F6179E51}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

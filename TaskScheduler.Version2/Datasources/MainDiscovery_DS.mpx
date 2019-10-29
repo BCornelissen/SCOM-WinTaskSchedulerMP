@@ -1,0 +1,253 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <!-- DS check if Windows version matches and PowerShell is installed. If not it will quit silently (without running the scrip)      -->
+      <DataSourceModuleType ID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <IncludeSchemaTypes>
+            <SchemaType>System!System.Discovery.MapperSchema</SchemaType>
+            <SchemaType>System!System.ExpressionEvaluatorSchema</SchemaType>
+          </IncludeSchemaTypes>
+           <xsd:element minOccurs="1" name="ComputerName" type="xsd:string" />
+           <xsd:element minOccurs="1" name="WindowsVersionRegEx" type="xsd:string" />
+          <xsd:element minOccurs="1" name="PathRegEx" type="xsd:string" />
+          <xsd:element minOccurs="1" name="NameRegEx" type="xsd:string" />
+          <xsd:element minOccurs="1" name="PathExcludeRegEx" type="xsd:string" />
+          <xsd:element minOccurs="1" name="NameExcludeRegEx" type="xsd:string" />
+          <xsd:element minOccurs="1" name="DiscoverWindowsTasks" type="xsd:boolean"/>
+          <xsd:element minOccurs="1" name="DiscoverHiddenTasks" type="xsd:boolean" />
+          <xsd:element minOccurs="1" name="IntervalSeconds" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="SpreadInitializationOverInterval" type="xsd:integer" />  
+          <xsd:element minOccurs="1" name="Debug" type="xsd:boolean" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer"  />
+          <xsd:element minOccurs="1" name="ClassId" type="xsd:string" />
+          <xsd:element minOccurs="1" name="InstanceSettings" type="SettingsType" />
+          <xsd:element minOccurs="1" name="Expression" type="ExpressionType" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="WindowsVersionRegEx" Selector="$Config/WindowsVersionRegEx$" ParameterType="string" />
+          <OverrideableParameter ID="PathRegEx" Selector="$Config/PathRegEx$" ParameterType="string" />
+          <OverrideableParameter ID="NameRegEx" Selector="$Config/NameRegEx$" ParameterType="string" />
+           <OverrideableParameter ID="PathExcludeRegEx" Selector="$Config/PathExcludeRegEx$" ParameterType="string" />
+          <OverrideableParameter ID="NameExcludeRegEx" Selector="$Config/NameExcludeRegEx$" ParameterType="string" />       
+          <OverrideableParameter ID="DiscoverWindowsTasks" Selector="$Config/DiscoverWindowsTasks$" ParameterType="bool" />
+          <OverrideableParameter ID="DiscoverHiddenTasks" Selector="$Config/DiscoverHiddenTasks$" ParameterType="bool" />
+         <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SpreadInitializationOverInterval" Selector="$Config/SpreadInitializationOverInterval$" ParameterType="int" />
+          <OverrideableParameter ID="Debug" Selector="$Config/Debug$" ParameterType="bool" />
+        <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <!-- UniquenessScheduler features UniquenessKey to force running just once per computer         -->
+              <!--     such both discoveries will cook down into a single script run                       -->
+              <!--     MPBA will complain but this is ok as SpreadInitializationOverInterval is implementd -->
+                <DataSource ID="Scheduler" TypeID="System!System.UniquenessScheduler">
+                <Scheduler>
+                  <SimpleReccuringSchedule>
+                    <Interval Unit="Seconds">$Config/IntervalSeconds$</Interval>
+                    <SpreadInitializationOverInterval>$Config/SpreadInitializationOverInterval$</SpreadInitializationOverInterval>
+                  </SimpleReccuringSchedule>
+                  <ExcludeDates />
+                </Scheduler>
+                <UniquenessKey>$Config/ComputerName$</UniquenessKey>
+              </DataSource>
+
+              <!-- check what Windows Version and if PowerShell -->
+              <ProbeAction TypeID="Windows!Microsoft.Windows.RegistryProbe" ID="RegistryProbe">
+                <ComputerName>$Config/ComputerName$</ComputerName>
+                <RegistryAttributeDefinitions>
+                  <!-- Windows Version -->
+                  <RegistryAttributeDefinition>
+                    <AttributeName>CurrentVersion</AttributeName>
+                    <Path>SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion</Path>
+                    <PathType>1</PathType>
+                    <AttributeType>1</AttributeType>
+                    <RegistryView>Default</RegistryView>
+                  </RegistryAttributeDefinition>
+                  <!-- PowerShell -->
+                  <RegistryAttributeDefinition>
+                    <AttributeName>PowerShell</AttributeName>
+                    <Path>SOFTWARE\Microsoft\PowerShell</Path>
+                    <PathType>0</PathType>
+                    <AttributeType>0</AttributeType>
+                    <RegistryView>Default</RegistryView>
+                  </RegistryAttributeDefinition>
+                </RegistryAttributeDefinitions>
+              </ProbeAction>
+              
+
+              <ProbeAction ID="ScriptProbe" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.ScriptProbe">
+                <DiscoverWindowsTasks>$Config/DiscoverWindowsTasks$</DiscoverWindowsTasks>
+                <!-- discovery does not need to evaluate run time -->
+                <LastRunDurationLookback>0</LastRunDurationLookback>
+                <Debug>$Config/Debug$</Debug>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </ProbeAction>
+
+              <ConditionDetection TypeID="System!System.LogicalSet.ExpressionFilter" ID="WinVerPoSh">
+                <Expression>
+                  <And>
+                    <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Values/CurrentVersion</XPathQuery>
+                        </ValueExpression>
+                        <Operator>MatchesRegularExpression</Operator>
+                        <Pattern>$Config/WindowsVersionRegEx$</Pattern>
+                      </RegExExpression>
+                    </Expression>
+                    <Expression>
+                      <SimpleExpression>
+                         <ValueExpression>
+                           <XPathQuery Type="Boolean">Values/PowerShell</XPathQuery>
+                         </ValueExpression>
+                         <Operator>Equal</Operator>
+                         <ValueExpression>
+                           <Value Type="Boolean">true</Value>
+                         </ValueExpression>
+                       </SimpleExpression>
+                  </Expression>
+                  </And>
+                </Expression>
+                <!-- block any empty data set -->
+							<EmptySet>Block</EmptySet>
+							<!-- pass any data set that contains data -->
+							<SetEvaluation>Any</SetEvaluation>
+              </ConditionDetection>
+
+              <ConditionDetection ID="TaskInstanceFilter" TypeID="System!System.ExpressionFilter">
+                <Expression>
+                  <And>
+                    <!-- include filters -->
+                     <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                        </ValueExpression>
+                        <Operator>MatchesRegularExpression</Operator>
+                        <Pattern>$Config/PathRegEx$</Pattern>
+                      </RegExExpression>
+                    </Expression>
+                    <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Property[@Name='Name']</XPathQuery>
+                        </ValueExpression>
+                        <Operator>MatchesRegularExpression</Operator>
+                        <Pattern>$Config/NameRegEx$</Pattern>
+                      </RegExExpression>
+                    </Expression>
+                    <!-- exclude filters -->
+                    <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                        </ValueExpression>
+                        <Operator>DoesNotMatchRegularExpression</Operator>
+                        <Pattern>$Config/PathExcludeRegEx$</Pattern>
+                      </RegExExpression>
+                    </Expression>
+                    <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Property[@Name='Name']</XPathQuery>
+                        </ValueExpression>
+                        <Operator>DoesNotMatchRegularExpression</Operator>
+                        <Pattern>$Config/NameExcludeRegEx$</Pattern>
+                      </RegExExpression>
+                    </Expression>  
+                    <Expression>
+                      <Or>
+                        <!-- filter to enable discovery of hidden tasks -->
+                        <Expression>
+                          <And>
+                            <Expression>
+                              <SimpleExpression>
+                                <ValueExpression>
+                                  <Value Type="String">$Config/DiscoverHiddenTasks$</Value>
+                                </ValueExpression>
+                                <Operator>Equal</Operator>
+                                <ValueExpression>
+                                  <Value Type="String">false</Value>
+                                </ValueExpression>
+                              </SimpleExpression>
+                            </Expression>
+                            <Expression>
+                              <RegExExpression>
+                                <ValueExpression>
+                                  <XPathQuery Type="String">Property[@Name='Hidden']</XPathQuery>
+                                </ValueExpression>
+                                <Operator>MatchesRegularExpression</Operator>
+                                <Pattern>false</Pattern>
+                              </RegExExpression>
+                            </Expression>
+                          </And>
+                        </Expression>
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <Value Type="String">$Config/DiscoverHiddenTasks$</Value>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">true</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                      </Or>
+                    </Expression>
+
+                  </And>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="ClassMapper" TypeID="System!System.Discovery.FilteredClassSnapshotDataMapper">
+                <Expression>$Config/Expression$</Expression>
+                <ClassId>$Config/ClassId$</ClassId>
+                <InstanceSettings>$Config/InstanceSettings$</InstanceSettings>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="ClassMapper">
+                <Node ID="TaskInstanceFilter" >
+                  <Node ID="ScriptProbe">
+                    <Node ID="WinVerPoSh">
+                      <Node ID="RegistryProbe">
+                        <Node ID="Scheduler" />
+                      </Node>
+                    </Node>
+                  </Node>
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.Discovery.Data</OutputType>
+      </DataSourceModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource">
+          <Name>Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource</Name>
+          <Description>Script Discovery DS</Description>
+        </DisplayString>
+        <!-- display strings for override parameters -->
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource" SubElementID="PathRegEx">
+          <Name>Task Path Include Filter (RegEx)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource" SubElementID="NameRegEx">
+          <Name>Task Name Include Filter (RegEx)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource" SubElementID="PathExcludeRegEx">
+          <Name>Task Path Exclude Filter (RegEx)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource" SubElementID="NameExcludeRegEx">
+          <Name>Task Name Exclude Filter (RegEx)</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

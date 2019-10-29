@@ -1,0 +1,317 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Discoveries>
+      <!-- scheduled discovery -->
+      <!--    note: this script will return an empty bag if run on Windows Server 2003 -->
+      <!--    hence targeting Microsoft.Windows.Computer is possible                   -->
+      <!--                                                                             -->
+      <!--    plus DS will block execution on computers without PowerShell             -->
+      <Discovery ID="Custom.PSScheduledJob.Job.DiscoverByScript" Enabled="false" Target="Windows!Microsoft.Windows.Computer" ConfirmDelivery="false" Remotable="false" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryClass TypeID="Custom.PSScheduledJob.Job">
+            <Property TypeID="System!System.Entity" PropertyID="DisplayName" />
+            <Property TypeID="Windows!Microsoft.Windows.Computer" PropertyID="PrincipalName" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskName" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskPath" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskAuthor" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskDescription" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskIsHidden" />
+            <!-- no longer discovery this property with LastResult -->
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskLastResult" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskLastRunTime" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskNextRunTime" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskStatus" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskTriggers" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskActions" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskUser" />
+          </DiscoveryClass>
+          <DiscoveryRelationship TypeID="SchTaskLib!Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" />
+        </DiscoveryTypes>
+        <DataSource ID="DS" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource">
+          <ComputerName>$Target/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <WindowsVersionRegEx>^6\.</WindowsVersionRegEx>
+          <PathRegEx>.*</PathRegEx>
+          <NameRegEx>.*</NameRegEx>
+          <PathExcludeRegEx>^$</PathExcludeRegEx>
+          <NameExcludeRegEx>^$</NameExcludeRegEx>
+          <DiscoverWindowsTasks>false</DiscoverWindowsTasks>
+          <DiscoverHiddenTasks>false</DiscoverHiddenTasks>
+          <IntervalSeconds>14400</IntervalSeconds>
+          <SpreadInitializationOverInterval>900</SpreadInitializationOverInterval>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+          <ClassId>$MPElement[Name="Custom.PSScheduledJob.Job"]$</ClassId>
+          <InstanceSettings>
+            <Settings>
+              <Setting>
+                <Name>$MPElement[Name="Windows!Microsoft.Windows.Computer"]/PrincipalName$</Name>
+                <Value>$Target/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskName$</Name>
+                <Value>$Data/Property[@Name='Name']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</Name>
+                <Value>$Data/Property[@Name='Path']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskAuthor$</Name>
+                <Value>$Data/Property[@Name='Author']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskDescription$</Name>
+                <Value>$Data/Property[@Name='Description']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskIsHidden$</Name>
+                <Value>$Data/Property[@Name='Hidden']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskLastResult$</Name>
+                <!-- as monitors no longer depend on this discovered property, set it to a static value -->
+                <!--<Value>$Data/Property[@Name='LastTaskResult']$</Value>-->
+                <Value> - </Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskLastRunTime$</Name>
+                <Value>$Data/Property[@Name='LastRunTime']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskNextRunTime$</Name>
+                <Value>$Data/Property[@Name='NextRunTime']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskStatus$</Name>
+                <Value>$Data/Property[@Name='StateText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskTriggers$</Name>
+                <Value>$Data/Property[@Name='TriggerText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskActions$</Name>
+                <Value>$Data/Property[@Name='ActionText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskUser$</Name>
+                <Value>$Data/Property[@Name='User']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</Name>
+                <Value>$Data/Property[@Name='DiscoverWindowsTasksSetting']$</Value>
+              </Setting>
+
+              <Setting>
+                <Name>$MPElement[Name="System!System.Entity"]/DisplayName$</Name>
+                <Value>PS Job: $Data/Property[@Name='Name']$</Value>
+              </Setting>
+            </Settings>
+          </InstanceSettings>
+          <Expression>
+            <And>
+              <Expression>
+                <!-- only PSScheduledJob -->
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='IsPSScheduledJob']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">True</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <!-- only if job name was returned via PSScheduledJob module -->
+                <RegExExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='PSJobName']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>MatchesRegularExpression</Operator>
+                  <Pattern>.+</Pattern>
+                </RegExExpression>
+              </Expression>
+              <Expression>
+                <!-- only tasks without a repetitive schedule -->
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='TaskIsScheduled']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>NotEqual</Operator>
+                  <ValueExpression>
+                    <Value Type="String">True</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </Expression>
+        </DataSource>
+      </Discovery>
+      <Discovery ID="Custom.PSScheduledJob.ScheduledJob.DiscoverByScript" Enabled="false" Target="Windows!Microsoft.Windows.Computer" ConfirmDelivery="false" Remotable="false" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryClass TypeID="Custom.PSScheduledJob.ScheduledJob">
+            <Property TypeID="System!System.Entity" PropertyID="DisplayName" />
+            <Property TypeID="Windows!Microsoft.Windows.Computer" PropertyID="PrincipalName" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskName" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskPath" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskAuthor" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskDescription" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskIsHidden" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskLastResult" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskLastRunTime" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskNextRunTime" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskStatus" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskTriggers" />
+            <Property TypeID="Custom.TaskScheduler2.Task" PropertyID="TaskActions" />
+            <Property TypeID="SchTaskLib!Custom.Windows.TaskSchedulerTask" PropertyID="TaskUser" />
+          </DiscoveryClass>
+          <DiscoveryRelationship TypeID="SchTaskLib!Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" />
+        </DiscoveryTypes>
+        <DataSource ID="DS" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.Discovery.DataSource">
+          <ComputerName>$Target/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <WindowsVersionRegEx>^6\.</WindowsVersionRegEx>
+          <PathRegEx>.*</PathRegEx>
+          <NameRegEx>.*</NameRegEx>
+          <PathExcludeRegEx>^$</PathExcludeRegEx>
+          <NameExcludeRegEx>^$</NameExcludeRegEx>
+          <DiscoverWindowsTasks>false</DiscoverWindowsTasks>
+          <DiscoverHiddenTasks>false</DiscoverHiddenTasks>
+          <IntervalSeconds>14400</IntervalSeconds>
+          <SpreadInitializationOverInterval>900</SpreadInitializationOverInterval>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+          <ClassId>$MPElement[Name="Custom.PSScheduledJob.ScheduledJob"]$</ClassId>
+          <InstanceSettings>
+            <Settings>
+              <Setting>
+                <Name>$MPElement[Name="Windows!Microsoft.Windows.Computer"]/PrincipalName$</Name>
+                <Value>$Target/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskName$</Name>
+                <Value>$Data/Property[@Name='Name']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</Name>
+                <Value>$Data/Property[@Name='Path']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskAuthor$</Name>
+                <Value>$Data/Property[@Name='Author']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskDescription$</Name>
+                <Value>$Data/Property[@Name='Description']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskIsHidden$</Name>
+                <Value>$Data/Property[@Name='Hidden']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskLastResult$</Name>
+                <!-- as monitors no longer depend on this discovered property, set it to a static value -->
+                <!--<Value>$Data/Property[@Name='LastTaskResult']$</Value>-->
+                <Value> - </Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskLastRunTime$</Name>
+                <Value>$Data/Property[@Name='LastRunTime']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskNextRunTime$</Name>
+                <Value>$Data/Property[@Name='NextRunTime']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskStatus$</Name>
+                <Value>$Data/Property[@Name='StateText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskTriggers$</Name>
+                <Value>$Data/Property[@Name='TriggerText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/TaskActions$</Name>
+                <Value>$Data/Property[@Name='ActionText']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskUser$</Name>
+                <Value>$Data/Property[@Name='User']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</Name>
+                <Value>$Data/Property[@Name='DiscoverWindowsTasksSetting']$</Value>
+              </Setting>
+              <Setting>
+                <Name>$MPElement[Name="System!System.Entity"]/DisplayName$</Name>
+                <Value>PS Job: $Data/Property[@Name='Name']$</Value>
+              </Setting>
+            </Settings>
+          </InstanceSettings>
+          <Expression>
+            <And>
+              <Expression>
+                <!-- only PSScheduledJob -->
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='IsPSScheduledJob']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">True</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <!-- only if job name was returned via PSScheduledJob module -->
+                <RegExExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='PSJobName']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>MatchesRegularExpression</Operator>
+                  <Pattern>.+</Pattern>
+                </RegExExpression>
+              </Expression>
+              <Expression>
+                <!-- only tasks without a repetitive schedule -->
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Property[@Name='TaskIsScheduled']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">True</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+
+          </Expression>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Overrides>
+      <!-- disable for client OS                                                        -->
+      <DiscoveryPropertyOverride ID="Custom.PSScheduledJob.Job.DiscoverByScript.Override.for.Clients" Context="Windows!Microsoft.Windows.Client.Computer" Enforced="false" Discovery="Custom.PSScheduledJob.Job.DiscoverByScript" Property="Enabled">
+        <Value>false</Value>
+      </DiscoveryPropertyOverride>
+      <DiscoveryPropertyOverride ID="Custom.PSScheduledJob.ScheduledJob.DiscoverByScript.Override.for.Clients" Context="Windows!Microsoft.Windows.Client.Computer" Enforced="false" Discovery="Custom.PSScheduledJob.ScheduledJob.DiscoverByScript" Property="Enabled">
+        <Value>false</Value>
+      </DiscoveryPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.PSScheduledJob.Job.DiscoverByScript">
+          <Name>PowerShell Job General Trigger Job Discovery (Windows Server 2008 through 2012 R2)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.PSScheduledJob.ScheduledJob.DiscoverByScript">
+          <Name>PowerShell Job Schedule Triggered Job Discovery (Windows Server 2008 through 2012 R2)</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

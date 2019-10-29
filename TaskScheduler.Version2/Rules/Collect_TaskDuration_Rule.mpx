@@ -1,0 +1,37 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Rules>
+      <Rule ID="Custom.TaskScheduler2.Task.TaskDuration.Collect" Enabled="false" Target="Custom.TaskScheduler2.Task" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Custom.Windows.ScheduledTask.TaskDuration.DataSource">
+            <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+            <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+            <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+            <Debug>false</Debug>
+            <TimeoutSeconds>300</TimeoutSeconds>
+            <!-- having an optimized filter should prevent from getting the same data point written twice on often runnig tasks -->
+            <Tolerance>1</Tolerance>
+            <ToleranceType>Percentage</ToleranceType>
+            <!-- write a data point on every 5th sample even if tolerance condition isn't met -->
+            <MaximumSampleSeparation>5</MaximumSampleSeparation>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+    </Rules>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.TaskDuration.Collect">
+          <Name>Collect scheduled task job duration</Name>
+          <Description>Writes the following performance counters: Windows Scheduled Tasks / Job Duration (min)</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

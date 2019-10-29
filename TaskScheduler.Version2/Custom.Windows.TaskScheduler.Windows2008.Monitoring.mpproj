@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{c592b81e-fb70-4379-bd67-1672d5ab638e}</ProjectGuid>
+    <RootNamespace>Custom.Windows.TaskScheduler.Windows2008</RootNamespace>
+    <Name>Windows Task Scheduler V2 and PS Job Monitoring - Windows Server 2008 and later</Name>
+    <ManagementPackName>Custom.Windows.TaskScheduler.Windows2008.Monitoring</ManagementPackName>
+    <Version>1.2.0.500</Version>
+    <MpFrameworkVersion>v7.0</MpFrameworkVersion>
+    <MpFrameworkProfile>OM</MpFrameworkProfile>
+    <ProductVersion>1.1.0.0</ProductVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <GenerateSealed>True</GenerateSealed>
+    <Company>Raphael Burri</Company>
+    <Copyright>Copyright (c) Raphael Burri. All rights reserved.</Copyright>
+    <DelaySigning>False</DelaySigning>
+    <AssemblyOriginatorKeyFile>..\_signing\Custom_Raphael_Burri.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>false</DebugSymbols>
+    <OutputPath>bin\Release\</OutputPath>
+    <DelaySigning>false</DelaySigning>
+    <Company>MyCompany</Company>
+    <Copyright>Copyright (c) MyCompany. All rights reserved.</Copyright>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <ManagementPackReference Include="Microsoft.SystemCenter.DataWarehouse.Library">
+      <HintPath>C:\Program Files (x86)\System Center Visual Studio Authoring Extensions\References\OM2016\Microsoft.SystemCenter.DataWarehouse.Library.mp</HintPath>
+      <Alias>SCDW</Alias>
+      <MinVersion>7.0.8427.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.Library">
+      <Alias>SC</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Cluster.Library">
+      <HintPath>C:\Program Files (x86)\System Center Visual Studio Authoring Extensions\References\OM2016\Microsoft.Windows.Cluster.Library.mp</HintPath>
+      <Alias>ClusterLib</Alias>
+      <MinVersion>7.0.8427.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Library">
+      <Alias>Windows</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Server.2008.Discovery">
+      <HintPath>..\_References\Microsoft.Windows.Server.2008.Discovery.mp</HintPath>
+      <Alias>Windows2008</Alias>
+      <MinVersion>6.0.6000.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Server.Library">
+      <HintPath>C:\Program Files (x86)\System Center Visual Studio Authoring Extensions\References\OM2016\Microsoft.Windows.Server.Library.mp</HintPath>
+      <Alias>WindowsServer</Alias>
+      <MinVersion>6.0.6321.5</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Health.Library">
+      <Alias>Health</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Library">
+      <Alias>System</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.Visualization.Library">
+      <Alias>Visualization</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Performance.Library">
+      <HintPath>C:\Program Files (x86)\System Center Visual Studio Authoring Extensions\References\OM2016\System.Performance.Library.mp</HintPath>
+      <Alias>Performance</Alias>
+      <MinVersion>7.0.8427.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClassTypes\PSScheduledJob.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ClassTypes\TaskV2.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\EnableTaskHistory_WA.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\MainDiscovery_DS.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\MainScript_PA.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\Performance_TaskDuration_DS.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\RepeatedEventDS.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\RepeatedEventDS_ConfigurationChanged.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\RepeatedEventDS_TaskCompleted.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\Scheduler_Overridable_DS.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Datasources\WriteEvent_WA.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Discoveries\ClassicTaskDiscovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Discoveries\PSScheduledJobDiscovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Discoveries\ShowMessageActionGroupDiscovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Discoveries\Task_ComputerGroup_Discovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ManagementPack.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\Job_LastResult_Error_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\PowerShell_IsCompatible_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\TaskScheduled_NextRunDefined_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\TaskScheduler_Logging_Enabled_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\Task_ExecutionSkipped_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\Task_LastResult_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\Task_LongRunning_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Monitors\Task_NoTriggers_Monitor.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Job_LastResult_Error_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Registry2StateMonitorType.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\TaskScheduled_NextRunDefined_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Task_ExecutionSkipped_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Task_LastResult_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Task_LongRunning_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MonitorTypes\Task_NoTriggers_MT.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Overrides\DisableMonitoring_OnDisableGroup_Overrides.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Overrides\DisablePowerShellMonitor_on_ClusterVirtualServer_Override.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Recoveries\Task_LastResult_Recovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Recoveries\Task_Logging_Disabled_Recovery.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\Collect_TaskDuration_Rule.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\Write_TaskAction_TriggerEvent.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\Write_TaskConfiguration_TriggerEvent.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\Write_TaskEvaluateSchedule_TriggerEvent.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tasks\EnableTaskHistory_Task.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="View\MPAlerts_View.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TaskScheduler.Library\Custom.Windows.TaskScheduler.Library.mpproj">
+      <Name>Custom.Windows.TaskScheduler.Library</Name>
+      <Project>{6d5a5587-0bbb-471a-ae02-b32ce1cb6739}</Project>
+      <Private>True</Private>
+      <Alias>SchTaskLib</Alias>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Discoveries" />
+    <Folder Include="Datasources" />
+    <Folder Include="Monitors" />
+    <Folder Include="MonitorTypes" />
+    <Folder Include="ClassTypes" />
+    <Folder Include="Overrides" />
+    <Folder Include="Tasks" />
+    <Folder Include="View" />
+    <Folder Include="Recoveries" />
+    <Folder Include="Scripts" />
+    <Folder Include="Rules" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\EnableTaskHistory.ps1" />
+    <EmbeddedResource Include="Scripts\GetTaskAndJobsProperties_2.ps1" />
+    <EmbeddedResource Include="Scripts\WriteTaskEvent.ps1" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VSAC\Microsoft.SystemCenter.OperationsManager.targets" />
+</Project>

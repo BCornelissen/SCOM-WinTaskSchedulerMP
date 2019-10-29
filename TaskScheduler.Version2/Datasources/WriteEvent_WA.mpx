@@ -1,0 +1,80 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+        <!-- use Powershell to write an event when the config file has been modified -->
+		  <WriteActionModuleType ID="Custom.TaskScheduler2.Task.WorkflowTriggerEvent.WriteAction" Accessibility="Internal" Batching="false">
+			  <Configuration>
+          <xsd:element name="WaitTime" type="xsd:int" />
+          <xsd:element name="ManagementPackName" type="xsd:string" />
+          <xsd:element name="ManagementGroupName" type="xsd:string" />
+          <xsd:element name="EventId" type="xsd:int" />
+          <xsd:element name="EventType" type="xsd:string" />
+          <xsd:element name="EventCount" type="xsd:int" />
+          <xsd:element name="TimeWindowStart" type="xsd:string" />
+          <xsd:element name="TimeWindowEnd" type="xsd:string" />
+				  <xsd:element name="TimeoutSeconds" type="xsd:int" />
+			  </Configuration>
+			  <OverrideableParameters>
+				  <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+			  </OverrideableParameters>
+			  <ModuleImplementation Isolation="Any">
+				  <Composite>
+					  <MemberModules>
+						  <WriteAction ID="ScriptWA" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+							  <ScriptName>Custom.TaskScheduler2.Task.WorkflowTriggerEvent.ps1</ScriptName>
+							  <ScriptBody>$IncludeFileContent/Scripts/WriteTaskEvent.ps1$</ScriptBody>
+							  <Parameters>
+								  <Parameter>
+									  <Name>scriptName</Name>
+									  <Value>Custom.TaskScheduler2.Task.WorkflowTriggerEvent.ps1</Value>
+								  </Parameter>
+								  <Parameter>
+									  <Name>waitTime</Name>
+									  <Value>$Config/WaitTime$</Value>
+								  </Parameter>
+								  <Parameter>
+									  <Name>mpName</Name>
+									  <Value>$Config/ManagementPackName$</Value>
+								  </Parameter>
+                  <Parameter>
+                    <Name>mgName</Name>
+                    <Value>$Config/ManagementGroupName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>eventId</Name>
+                    <Value>$Config/EventId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>eventType</Name>
+                    <Value>$Config/EventType$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>eventCount</Name>
+                    <Value>$Config/EventCount$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>timeStart</Name>
+                    <Value>$Config/TimeWindowStart$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>timeEnd</Name>
+                    <Value>$Config/TimeWindowEnd$</Value>
+                  </Parameter>
+							  </Parameters>
+							  <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+							  <StrictErrorHandling>false</StrictErrorHandling>
+						  </WriteAction>
+					  </MemberModules>
+					  <Composition>
+						  <Node ID="ScriptWA">
+						  </Node>
+					  </Composition>
+				  </Composite>
+			  </ModuleImplementation>
+			  <OutputType>Windows!Microsoft.Windows.SerializedObjectData</OutputType>
+			  <InputType>System!System.BaseData</InputType>
+		  </WriteActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+  
+</ManagementPackFragment>

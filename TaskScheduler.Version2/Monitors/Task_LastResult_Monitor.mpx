@@ -1,0 +1,134 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.TaskScheduler2.Task.LastResult.Monitor" Accessibility="Public" Enabled="true" Target="Custom.TaskScheduler2.Task" ParentMonitorID="Health!System.Health.AvailabilityState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.ScheduledTaskV2.DiscoveryData.LastResult.MonitorType" ConfirmDelivery="false">
+        <Category>AvailabilityHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskScheduler2.Task.LastResult.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='Description']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4> 
+            <AlertParameter5>$Data/Context/Property[@Name='LastTaskResultHex']$</AlertParameter5>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="NoFailure" MonitorTypeStateID="NoFailure" HealthState="Success" />
+          <OperationalState ID="Failure" MonitorTypeStateID="Failure" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+          <!-- by default these values are OK:     -->
+          <!--  0                                  -->
+          <!--  1        (exit code of popup boxes)-> use in override only -->
+          <!--  267009   (currently running)       -->
+          <!--  267014   (terminated by user       -->
+          <!--  267045   (queued)                  -->
+          <!-- -2147216609 (instance of this task already running) -> being taken care of by the separate monitor -->
+          <DesiredReturnCode>^(0|267009|267014|267045|-2147216609)$</DesiredReturnCode>
+          <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+        <!-- tasks containing a ShowMessage action seem to end with a '1' return code -->
+        <MonitorConfigurationOverride ID="OverrideFor.Custom.TaskScheduler2.Task.LastResult.Monitor.ForContext.Custom.TaskScheduler2.Task.ShowMessageAction.Group" Context="Custom.TaskScheduler2.Task.ShowMessageAction.Group" Enforced="false" Monitor="Custom.TaskScheduler2.Task.LastResult.Monitor" Parameter="DesiredReturnCode">
+          <!-- by default these values are OK:     -->
+          <!--  0                                  -->
+          <!--  1        (exit code of popup boxes)-> use in override only -->
+          <!--  267009   (currently running)       -->
+          <!--  267014   (terminated by user       -->
+          <!--  267045   (queued)                  -->
+          <!-- -2147216609 (instance of this task already running) -> being taken care of by the separate monitor -->
+          <Value>^(0|1|267009|267014|267045|-2147216609)$</Value>
+        </MonitorConfigurationOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskScheduler2.Task.LastResult.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LastResult.Monitor">
+          <Name>Last Result Successful Monitor</Name>
+        </DisplayString>
+       <DisplayString ElementID="Custom.TaskScheduler2.Task.LastResult.Monitor.AlertMessage">
+          <Name>Scheduled Task failed to complete successfully</Name>
+          <Description>Last result code of Scheduled Task "{1}" was: {4}. It did not run successfully.
+ 
+ Task Scheduler Computer: {3}
+ Task Path: {0}
+ Task Description: {2}</Description>
+         </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.TaskScheduler2.Task.LastResult.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Windows Scheduled Task Last Result Monitor.</maml:para>
+              <maml:para>The monitor checks the last result code (exit code) of a scheduled task.</maml:para>
+              <maml:para>Anything other than the following values is considered a warning condition for an enabled scheduled task.</maml:para>
+              <maml:para> - '0'</maml:para>
+              <maml:para> - '1' (for tasks containing a popup action)</maml:para>
+              <maml:para> - '267009': currently running</maml:para>
+              <maml:para> - '267014': was terminated by user</maml:para>
+              <maml:para> - '267045': queued</maml:para>
+              <maml:para> - '-2147216609': instance of this task already running -&gt; being taken care of by the separate monitor</maml:para>
+              <maml:para> - '-2147750687': task already running -&gt; being taken care of by the separate monitor</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Use overrides to:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Disable the monitor</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Alter the expected return code 'Expected Return Code (RegEx)'. Use a valid regular expression. E.g. ^(0|9|123)$</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para />
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The process called by the scheduled task failed</maml:para>
+              <maml:para>Authentication problems of the scheduled task’s user account</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Consult the event log of the affected machine and/or <maml:navigationLink>
+                  <maml:linkText>Run Scheduled Task</maml:linkText>
+                  <maml:uri condition="Task" href="SchTaskLib!Custom.Windows.ScheduledTask.RunTask&amp;tasktarget={$TARGET$}" uri="MOM.Console.Exe" />
+                </maml:navigationLink>
+              </maml:para>
+              <maml:para>Disable or delete the Scheduled Task</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Additional</maml:title>
+              <maml:para>msdn reference about task scheduler 2.0 constants:</maml:para>
+              <maml:para>-
+                <maml:navigationLink>
+                  <maml:linkText>Task Scheduler Error and Success Constants</maml:linkText>
+                  <maml:uri href="http://msdn.microsoft.com/en-us/library/aa383604(VS.85).aspx" />
+                </maml:navigationLink>
+              </maml:para>
+              <maml:para>Note that the Operations Manager management pack displays the error codes as decimal values while the reference states hexadecimal. </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+      </LanguagePack>
+  </LanguagePacks>
+    </ManagementPackFragment>

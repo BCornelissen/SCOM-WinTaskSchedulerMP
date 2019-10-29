@@ -1,0 +1,26 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+     <Recoveries>
+      <Recovery ID="Custom.TaskScheduler2.Task.LastResult.Failure.Recovery" Accessibility="Public" Enabled="false" Target="Custom.TaskScheduler2.Task" Monitor="Custom.TaskScheduler2.Task.LastResult.Monitor" ResetMonitor="false" ExecuteOnState="Warning" Remotable="true" Timeout="120">
+        <Category>Custom</Category>
+        <WriteAction ID="RunTask" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/run /tn "$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$"</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Recovery>
+       </Recoveries>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+         <DisplayString ElementID="Custom.TaskScheduler2.Task.LastResult.Failure.Recovery">
+          <Name>Run Scheduled Task</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

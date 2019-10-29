@@ -1,0 +1,49 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Rules>
+      <!-- writes an event log entry every 4 hours                              -->
+      <!--     that event will trigger monitor and rule workflows; implementing -->
+      <!--     a schedule on top of the normal event driven triggers.           -->
+      <!--     enabled via internal override on computers with tasks discovered -->
+      <Rule ID="Custom.TaskScheduler2.Task.TaskEvaluateSchedule.EventCreation.Rule" Enabled="false" Target="SC!Microsoft.SystemCenter.HealthService" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>Operations</Category>
+        <DataSources>
+          <DataSource ID="Scheduler" TypeID="Custom.TaskScheduler2.Task.Scheduler.DS">
+                <Interval>14400</Interval>
+                <SpreadInitializationOverInterval>900</SpreadInitializationOverInterval>
+          </DataSource>
+         </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteEvent" TypeID="Custom.TaskScheduler2.Task.WorkflowTriggerEvent.WriteAction">
+            <WaitTime>0</WaitTime>
+            <ManagementPackName>Custom.Windows.TaskScheduler.Windows2008.Monitoring</ManagementPackName>
+            <ManagementGroupName>$Target/ManagementGroup/Name$</ManagementGroupName>
+            <EventId>1004</EventId>
+            <EventType>TaskEvaluateSchedule</EventType>
+            <EventCount>1</EventCount>
+            <TimeWindowStart>now</TimeWindowStart>
+            <TimeWindowEnd>now</TimeWindowEnd>
+            <TimeoutSeconds>300</TimeoutSeconds>
+          </WriteAction>
+        </WriteActions>
+      </Rule>
+    </Rules>
+    <Overrides>
+      <!-- enable only on computers that have tasks discovered -->
+      <RulePropertyOverride ID="Custom.TaskScheduler2.Task.TaskEvaluateSchedule.EventCreation.Rule.Override.for.Task2ComputerGroup" Context="Custom.TaskScheduler2.Task.ComputerGroup" Enforced="false" Rule="Custom.TaskScheduler2.Task.TaskEvaluateSchedule.EventCreation.Rule" Property="Enabled">
+        <Value>true</Value>
+      </RulePropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.TaskEvaluateSchedule.EventCreation.Rule">
+          <Name>Task Scheduler Evaluation Trigger Rule</Name>
+          <Description>Consolidated rule that writes an event to the 'Operations Manager' event log every 4 hours. That event is used to trigger monitors and rules.</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>

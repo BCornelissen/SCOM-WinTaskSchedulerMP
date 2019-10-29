@@ -1,0 +1,137 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor" Accessibility="Internal" Enabled="true" Target="Windows!Microsoft.Windows.OperatingSystem" ParentMonitorID="Health!System.Health.ConfigurationState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.TaskSchedulerV2.Registry2StateMonitorType" ConfirmDelivery="false">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor_AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="PS2_Compatible" MonitorTypeStateID="FirstCondition" HealthState="Success" />
+          <OperationalState ID="NotPS2_Compatible" MonitorTypeStateID="SecondCondition" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <WindowsVersionRegEx>^6\.</WindowsVersionRegEx>
+          <RegistryAttributeDefinitions>
+            <!-- PoSh 1.0 & 2.0 -->
+            <RegistryAttributeDefinition>
+              <AttributeName>PSCompatibleVersionV1</AttributeName>
+              <Path><![CDATA[SOFTWARE\Microsoft\Powershell\1\PowerShellEngine\PSCompatibleVersion]]></Path>
+              <PathType>1</PathType>
+              <AttributeType>1</AttributeType>
+              <RegistryView>Default</RegistryView>
+            </RegistryAttributeDefinition>
+            <!-- PoSh >= 3.0 -->
+            <RegistryAttributeDefinition>
+              <AttributeName>PSCompatibleVersionV3</AttributeName>
+              <Path><![CDATA[SOFTWARE\Microsoft\Powershell\3\PowerShellEngine\PSCompatibleVersion]]></Path>
+              <PathType>1</PathType>
+              <AttributeType>1</AttributeType>
+              <RegistryView>Default</RegistryView>
+            </RegistryAttributeDefinition>
+          </RegistryAttributeDefinitions>
+          <Frequency>3600</Frequency>
+          <FirstExpression>
+              <Or>
+                <Expression>
+              <RegExExpression>
+                <ValueExpression>
+                  <XPathQuery Type="String">Values/PSCompatibleVersionV1</XPathQuery>
+                </ValueExpression>
+                <Operator>MatchesRegularExpression</Operator>
+                <Pattern>2\.0</Pattern>
+              </RegExExpression>
+                </Expression>
+              <Expression>
+              <RegExExpression>
+                <ValueExpression>
+                  <XPathQuery Type="String">Values/PSCompatibleVersionV3</XPathQuery>
+                </ValueExpression>
+                <Operator>MatchesRegularExpression</Operator>
+                <Pattern>.\..</Pattern>
+              </RegExExpression>
+                </Expression>
+              </Or>
+          </FirstExpression>
+          <SecondExpression>
+              <And>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Values/PSCompatibleVersionV1</XPathQuery>
+                    </ValueExpression>
+                    <Operator>DoesNotMatchRegularExpression</Operator>
+                    <Pattern>2\.0</Pattern>
+                  </RegExExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Values/PSCompatibleVersionV3</XPathQuery>
+                    </ValueExpression>
+                    <Operator>DoesNotMatchRegularExpression</Operator>
+                    <Pattern>.\..</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+          </SecondExpression>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+      <!-- disable on client computers -->
+      <MonitorPropertyOverride ID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor.Override.for.Client.Computer" Context="Windows!Microsoft.Windows.Client.Computer" Enforced="false" Monitor="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor_AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor">
+          <Name>Scheduled Task Monitoring compatibility</Name>
+          <Description>The "Windows Task Scheduler and PS Job Monitoring" management pack uses PowerShell to discover and monitor scheduled tasks.
+If Powershell is not installed, the management pack will fail to discover tasks and jobs.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor_AlertMessage">
+          <Name>Task Scheduler Monitoring is not possible</Name>
+          <Description>PowerShell is not installed on computer {0} or the installed version is not compatible with PowerShell 2.0.
+
+In order to monitor scheduled tasks, install the appropriate PowerShell environment (>= Version 2.0).</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.TaskSchedulerV2.PowerShellCompatible.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>PowerShell Version >= 2.0 is required for scheduled task and PowerShell scheduled job monitoring.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>
+                Download and install PowerShell 2.0 or later on this agent computer from <maml:navigationLink>
+                  <maml:linkText>www.microsoft.com</maml:linkText>
+                  <maml:uri href="http://www.microsoft.com" />
+                </maml:navigationLink>
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>
