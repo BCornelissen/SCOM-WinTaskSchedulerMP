@@ -1,0 +1,82 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor" Accessibility="Public" Enabled="false" Target="Custom.TaskScheduler2.Task" ParentMonitorID="Health!System.Health.ConfigurationState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.MonitorType" ConfirmDelivery="false">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+           <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='Description']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4>
+            <AlertParameter5>$Data/Context/Property[@Name='TriggerText']$</AlertParameter5>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="HasTrigger" MonitorTypeStateID="HasTrigger" HealthState="Success" />
+          <OperationalState ID="NoTrigger" MonitorTypeStateID="NoTrigger" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+           <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+           <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+           <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+           <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID ="ENU" IsDefault="true">
+      <DisplayStrings>
+         <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor">
+          <Name>Triggers Defined Monitor</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor.AlertMessage">
+          <Name>Scheduled Task has no active triggers</Name>
+          <Description>The Scheduled Task "{1}" does not have any active triggers. The task will not run until its triggers are updated.
+          
+Task Scheduler Computer: {3}
+Task Path: {0}
+Task Description: {2}</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This monitor checks if a task has at least one trigger enabled. Tasks without any active triggers will never run unless started manually.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Disable the monitor if not required. Do so using overrides.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The task does not have any triggers or all are disabled.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>If you need the task running:</maml:para>
+              <maml:para> - Add or enable triggers</maml:para>
+              <maml:para>If you do not need the task running:</maml:para>
+              <maml:para> - Disable or delete the task</maml:para>
+              <maml:para />
+              <maml:para />
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

@@ -1,0 +1,231 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+         <DataSourceModuleType ID="Custom.Windows.ScheduledTask.TaskDuration.DataSource" Accessibility="Internal" Batching="false">
+           <Configuration>
+             <xsd:element name="ComputerName" type="xsd:string" />
+             <xsd:element name="TaskPath" type="xsd:string" />
+             <xsd:element name="WindowsTasks" type="xsd:boolean"/>
+             <xsd:element name="Debug" type="xsd:boolean" />
+             <xsd:element name="TimeoutSeconds" type="xsd:integer"  />
+            <xsd:element minOccurs="1" maxOccurs="1" name="Tolerance" type="xsd:double" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="0" maxOccurs="1" name="ToleranceType" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:simpleType>
+              <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="Absolute" />
+                <xsd:enumeration value="Percentage" />
+              </xsd:restriction>
+            </xsd:simpleType>
+          </xsd:element>
+          <xsd:element minOccurs="1" maxOccurs="1" name="MaximumSampleSeparation" type="xsd:unsignedInt" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+    
+           </Configuration>
+           <OverrideableParameters>
+             <OverrideableParameter ID="Debug" Selector="$Config/Debug$" ParameterType="bool" />
+             <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+                  <OverrideableParameter ID="Tolerance" ParameterType="double" Selector="$Config/Tolerance$" />
+          <OverrideableParameter ID="MaximumSampleSeparation" ParameterType="int" Selector="$Config/MaximumSampleSeparation$" />
+   
+           </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <!-- trigger on events: either agent start or after tasks have ended                                         -->
+              <!--     the latter are written by the rule Custom.TaskScheduler2.Task.TaskActionObserved.EventCreation.Rule -->
+              <DataSource ID="EventDS" TypeID="Custom.TaskScheduler2.Task.RepeatedEvent.DS">
+                <ComputerName>$Config/ComputerName$</ComputerName>
+                <LogName>Operations Manager</LogName>
+                <Expression>
+                  <Or>
+                    <Expression>
+                      <And>
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="UnsignedInteger">EventDisplayNumber</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="UnsignedInteger">1005</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="String">PublisherName</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">Health Service Script</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <!-- Script Name -->
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="String">Params/Param[2]</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">Custom.TaskScheduler2.Task.WorkflowTriggerEvent.ps1</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <!-- MP Name -->
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="String">Params/Param[4]</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">Custom.Windows.TaskScheduler.Windows2008.Monitoring</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <!-- Management Group Name -->
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">$Target/ManagementGroup/Name$</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                      </And>
+                    </Expression>
+                    <Expression>
+                      <And>
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="UnsignedInteger">EventDisplayNumber</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="UnsignedInteger">2002</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <Expression>
+                          <SimpleExpression>
+                            <ValueExpression>
+                              <XPathQuery Type="String">PublisherName</XPathQuery>
+                            </ValueExpression>
+                            <Operator>Equal</Operator>
+                            <ValueExpression>
+                              <Value Type="String">HealthService</Value>
+                            </ValueExpression>
+                          </SimpleExpression>
+                        </Expression>
+                        <!-- Management Group Name -->
+                        <!--
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Params/Param[1]</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">$Target/ManagementGroup/Name$</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      -->
+                      </And>
+                    </Expression>
+                  </Or>
+                </Expression>
+                <Consolidator>
+                  <ConsolidationProperties />
+                  <TimeControl>
+                    <!-- wait for delayed events -->
+                    <Latency>10</Latency>
+                    <!-- don't wait for backlogged items -->
+                    <DrainWait>0</DrainWait>
+                    <WithinTimeSchedule>
+                      <!-- don't call script more than once 10 seconds -->
+                      <Interval>10</Interval>
+                    </WithinTimeSchedule>
+                  </TimeControl>
+                  <!-- output only after the latency has passed -->
+                  <!--     will output any input item (if any) that has happened -->
+                  <CountingCondition>
+                    <CountMode>OnNewItemNOP_OnTimerOutputRestart</CountMode>
+                  </CountingCondition>
+                </Consolidator>
+              </DataSource>
+              <ProbeAction ID="ScriptProbe" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.ScriptProbe">
+                <DiscoverWindowsTasks>$Config/WindowsTasks$</DiscoverWindowsTasks>
+                <!-- look back maximum 3 minutes -->
+                <LastRunDurationLookback>180</LastRunDurationLookback>
+                <Debug>$Config/Debug$</Debug>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </ProbeAction>
+              <ConditionDetection ID="Filter" TypeID="System!System.ExpressionFilter">
+                <Expression>
+                  <And>
+                    <Expression>
+                      <SimpleExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                        </ValueExpression>
+                        <Operator>Equal</Operator>
+                        <ValueExpression>
+                          <Value Type="String">$Config/TaskPath$</Value>
+                        </ValueExpression>
+                      </SimpleExpression>
+                    </Expression>
+                    <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="Double">Property[@Name='LastRunDurationMinutes']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>GreaterEqual</Operator>
+                    <ValueExpression>
+                      <Value Type="Double">0</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                    </Expression>
+                  </And>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="PerfMapper" TypeID="Performance!System.Performance.DataGenericMapper">
+                <ObjectName>Windows Scheduled Tasks</ObjectName>
+                <CounterName>Job Duration (min)</CounterName>
+                <InstanceName>$Config/TaskPath$</InstanceName>
+                <Value>$Data/Property[@Name='LastRunDurationMinutes']$</Value>
+              </ConditionDetection>
+             <ConditionDetection ID="OptimizedFilter" TypeID="Performance!System.Performance.OptimizedCollectionFilter">
+                <Tolerance>$Config/Tolerance$</Tolerance>
+                <ToleranceType>$Config/ToleranceType$</ToleranceType>
+                <MaximumSampleSeparation>$Config/MaximumSampleSeparation$</MaximumSampleSeparation>
+               <!-- as this DS isn't running on a schedule; just use a generic value of 5 minutes -->
+                <SamplingPeriodInSeconds>300</SamplingPeriodInSeconds>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="OptimizedFilter">
+                <Node ID="PerfMapper">
+                  <Node ID="Filter">
+                    <Node ID="ScriptProbe" >
+                      <Node ID="EventDS" />
+                    </Node>
+                  </Node>
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>Performance!System.Performance.Data</OutputType>
+      </DataSourceModuleType>
+
+    </ModuleTypes>
+  </TypeDefinitions>
+  
+</ManagementPackFragment>

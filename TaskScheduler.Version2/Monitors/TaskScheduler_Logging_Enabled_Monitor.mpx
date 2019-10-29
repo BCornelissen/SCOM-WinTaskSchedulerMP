@@ -1,0 +1,113 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor" Accessibility="Internal" Enabled="false" Target="Windows!Microsoft.Windows.OperatingSystem" ParentMonitorID="Health!System.Health.ConfigurationState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.TaskSchedulerV2.Registry2StateMonitorType" ConfirmDelivery="false">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskSchedulerV2.EventLogEnabled.Monitor_AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="Log_Enabled" MonitorTypeStateID="FirstCondition" HealthState="Success" />
+          <OperationalState ID="Log_Disabled" MonitorTypeStateID="SecondCondition" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+            <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+              <WindowsVersionRegEx>^6\.</WindowsVersionRegEx>
+          <RegistryAttributeDefinitions>
+            <RegistryAttributeDefinition>
+              <AttributeName>IsEnabled</AttributeName>
+              <Path><![CDATA[SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-TaskScheduler/Operational\Enabled]]></Path>
+              <PathType>1</PathType>
+              <AttributeType>2</AttributeType>
+              <RegistryView>Default</RegistryView>
+            </RegistryAttributeDefinition>
+          </RegistryAttributeDefinitions>
+          <Frequency>3600</Frequency>
+              <FirstExpression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Values/IsEnabled</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">1</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+               </FirstExpression>
+              <SecondExpression> 
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Values/IsEnabled</XPathQuery>
+                  </ValueExpression>
+                  <Operator>NotEqual</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">1</Value>
+                  </ValueExpression>
+                </SimpleExpression></SecondExpression>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+       <!-- enable only on computers that have tasks discovered -->
+      <MonitorPropertyOverride ID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor.Override.for.Task2ComputerGroup" Context="Custom.TaskScheduler2.Task.ComputerGroup" Enforced="false" Monitor="Custom.TaskSchedulerV2.EventLogEnabled.Monitor" Property="Enabled">
+        <Value>true</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor_AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor">
+          <Name>Scheduled Tasks History Enabled</Name>
+          <Description>All Tasks History must be enabled or the Scheduled Task MP will not be able to monitor the scheduled tasks.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor_AlertMessage">
+          <Name>Task Scheduler: All Tasks History is disabled</Name>
+          <Description>All Tasks History on computer '{0}' is disabled.
+The Scheduled Task Management Pack will not be able to monitor the tasks on this computer.
+
+"Enable All Tasks History" on the Task Scheduler's action pane.</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Windows Scheduled Tasks History Enabled Monitor.</maml:para>
+              <maml:para>The monitor checks if logging to the 'Microsoft-Windows-TaskScheduler/Operational' event log is enabled.</maml:para>
+              <maml:para>Without logging enabled 'Windows Task Scheduler Monitoring MP' will not be able to properly monitor the scheduled tasks on this computer.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Open 'Task Scheduler' (taskschd.msc /s) and:</maml:para>
+              <maml:para> - 'Enable All Tasks History' from the action pane</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>Logging to 'Microsoft-Windows-TaskScheduler/Operational' is not enabled</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Enable logging</maml:para>
+              <maml:para />
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

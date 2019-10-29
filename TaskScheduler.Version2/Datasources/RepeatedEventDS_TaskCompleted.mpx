@@ -1,0 +1,86 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <DataSourceModuleType ID="Custom.TaskScheduler2.Task.RepeatedEvent_TaskEndingObserved.DS" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element name="ComputerName" type="xsd:string" />
+          <xsd:element name="ConsolidationSeconds" type="xsd:int" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="ConsolidationSeconds" Selector="$Config/ConsolidationSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <DataSource ID="EventDS" TypeID="Custom.TaskScheduler2.Task.RepeatedEvent.DS">
+                <ComputerName>$Config/ComputerName$</ComputerName>
+                <LogName><![CDATA[Microsoft-Windows-TaskScheduler/Operational]]></LogName>
+                <Expression>
+                  <And>
+                    <!--  task started (100)
+                          task failure (101)
+                          task completed (102)
+                          task registered (106)
+                          task terminated (111)
+                          task registration updated (140)
+                          task registration deleted (141)
+                          task disabled (142)
+                          action completed (201)
+                          task engine idle (314)
+                          task termination request (320)
+                          task stopped due to timeout (329)
+                          task stopping due to user request (330)
+                          -->
+                    <Expression>
+                      <RegExExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="Integer">EventDisplayNumber</XPathQuery>
+                        </ValueExpression>
+                        <Operator>MatchesRegularExpression</Operator>
+                        <Pattern>^(101|102|111)$</Pattern>
+                      </RegExExpression>
+                    </Expression>
+                    <Expression>
+                      <SimpleExpression>
+                        <ValueExpression>
+                          <XPathQuery Type="String">EventSourceName</XPathQuery>
+                        </ValueExpression>
+                        <Operator>Equal</Operator>
+                        <ValueExpression>
+                          <Value Type="String">Microsoft-Windows-TaskScheduler</Value>
+                        </ValueExpression>
+                      </SimpleExpression>
+                    </Expression>
+                  </And>
+                </Expression>
+                <Consolidator>
+                  <ConsolidationProperties />
+                  <TimeControl>
+                    <!-- wait for delayed events -->
+                    <Latency>10</Latency>
+                    <!-- don't wait for backlogged items -->
+                    <DrainWait>0</DrainWait>
+                    <WithinTimeSchedule>
+                      <!-- don't call script more than once every n seconds -->
+                      <Interval>$Config/ConsolidationSeconds$</Interval>
+                    </WithinTimeSchedule>
+                  </TimeControl>
+                  <!-- output only after the latency has passed                  -->
+                  <!--     will output any input item (if any) that has happened -->
+                  <!--     otherwise remain quiet                                -->
+                  <CountingCondition>
+                       <CountMode>OnNewItemNOP_OnTimerOutputRestart</CountMode>
+                  </CountingCondition>
+                </Consolidator>
+              </DataSource>
+            </MemberModules>
+            <Composition>
+                <Node ID="EventDS" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.ConsolidatorData</OutputType>
+      </DataSourceModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

@@ -1,0 +1,39 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <!-- use Powershell to enable Task Scheduler History (sets regitsry key on event log settings) -->
+      <WriteActionModuleType ID="Custom.TaskScheduler2.Task.EnableTaskHistory.WriteAction" Accessibility="Internal" Batching="false">
+        <Configuration>
+           <xsd:element name="TimeoutSeconds" type="xsd:integer"  />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="ScriptWA" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Custom.TaskScheduler2.Task.EnableTaskSchedulerHistory.ps1</ScriptName>
+                <ScriptBody>$IncludeFileContent/Scripts/EnableTaskHistory.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>scriptName</Name>
+                    <Value>Custom.TaskScheduler2.Task.EnableTaskSchedulerHistory.ps1</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+                <StrictErrorHandling>false</StrictErrorHandling>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="ScriptWA">
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>Windows!Microsoft.Windows.SerializedObjectData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

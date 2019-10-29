@@ -1,0 +1,49 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <WriteActionModuleType ID="Custom.Windows.ScheduledTaskV2.HandlingScriptWA" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="ComputerName" type="xsd:string" />
+          <xsd:element minOccurs="1" name="Folder" type="xsd:string" />
+          <xsd:element minOccurs="1" name="TaskName" type="xsd:string"/>
+          <xsd:element minOccurs="1" name="Operation" type="xsd:string"/>
+        </Configuration>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="TaskHandlingScript" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Custom.Windows.ScheduledTaskV2.TaskDescription_Script.ps1</ScriptName>
+                <ScriptBody>$IncludeFileContent/Scripts/TaskDescription_Script.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>computerName</Name>
+                    <Value>$Config/ComputerName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>folder</Name>
+                    <Value>$Config/Folder$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>taskName</Name>
+                    <Value>$Config/TaskName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>operation</Name>
+                    <Value>$Config/Operation$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="TaskHandlingScript" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>Windows!Microsoft.Windows.SerializedObjectData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

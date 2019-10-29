@@ -1,0 +1,54 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <ModuleTypes>
+      <ProbeActionModuleType ID="Custom.TaskScheduler2.Task.GetTaskProperties.ScriptProbe" Accessibility="Internal" Batching="false" PassThrough="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="DiscoverWindowsTasks" type="xsd:boolean" />
+          <xsd:element minOccurs="1" name="LastRunDurationLookback" type="xsd:integer" />
+          <xsd:element minOccurs="1" name="Debug" type="xsd:boolean" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" />
+        </Configuration>
+        <OverrideableParameters>
+       <OverrideableParameter ID="DiscoverWindowsTasks" Selector="$Config/DiscoverWindowsTasks$" ParameterType="bool" />
+        <OverrideableParameter ID="LastRunDurationLookback" Selector="$Config/LastRunDurationLookback$" ParameterType="int" />
+          <OverrideableParameter ID="Debug" Selector="$Config/Debug$" ParameterType="bool" />
+        <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <ProbeAction ID="TaskBagProbe" TypeID="Windows!Microsoft.Windows.PowerShellPropertyBagTriggerOnlyProbe">
+                <ScriptName>Custom.TaskScheduler2.Task.GetTaskAndJobsProperties.ps1</ScriptName>
+                <ScriptBody>$IncludeFileContent/Scripts/GetTaskAndJobsProperties_2.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>scriptName</Name>
+                    <Value>Custom.TaskScheduler2.Task.GetTaskAndJobsProperties.ps1</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>discoverWindowsTasks</Name>
+                    <Value>$Config/DiscoverWindowsTasks$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>lastRunDurationLookback</Name>
+                    <Value>$Config/LastRunDurationLookback$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>debugParam</Name>
+                    <Value>$Config/Debug$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </ProbeAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="TaskBagProbe" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.PropertyBagData</OutputType>
+        <TriggerOnly>true</TriggerOnly>
+      </ProbeActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

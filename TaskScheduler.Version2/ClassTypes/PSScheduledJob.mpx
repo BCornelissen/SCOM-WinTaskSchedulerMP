@@ -1,0 +1,27 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <TypeDefinitions>
+      <EntityTypes>
+        <ClassTypes>
+          <!-- PowerShell >= 3.0 scheduled job -->
+          <!-- Generic Class -->
+          <ClassType ID="Custom.PSScheduledJob.Job" Accessibility="Public" Abstract="false" Base="Custom.TaskScheduler2.Task" Hosted="true" Singleton="false" />
+            <!-- Tasks with a repetitive schedule -->
+            <ClassType ID="Custom.PSScheduledJob.ScheduledJob" Accessibility="Public" Abstract="false" Base="Custom.TaskScheduler2.ScheduledTask" Hosted="true" Singleton="false" />
+        </ClassTypes>
+      </EntityTypes>
+    </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.PSScheduledJob.Job">
+          <Name>PowerShell Job</Name>
+          <Description>PSScheduledJob (introduced with PowerShell 3.0)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Custom.PSScheduledJob.ScheduledJob">
+          <Name>Powershell Job (time scheduled)</Name>
+          <Description>PSScheduledJob (introduced with PowerShell 3.0) - with a repetitive schedule</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

@@ -1,0 +1,107 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <!-- uses a timed script to calculate the task running duration for currently running tasks -->
+      <UnitMonitor ID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor" Accessibility="Public" Enabled="false" Target="Custom.TaskScheduler2.Task" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="false" Priority="Normal" TypeID="Custom.TaskScheduler2.Task.LongRunningTask.MonitorType" ConfirmDelivery="false">
+        <Category>PerformanceHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskScheduler2.Task.LongRunningTask.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='Description']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4>
+            <AlertParameter5>$Data/Context/Property[@Name="LastRunDurationMinutes"]$</AlertParameter5>
+            <AlertParameter6>$Data/Context/Property[@Name="CurrentRunDurationMinutes"]$</AlertParameter6>
+            <AlertParameter7>$Data/Context/Property[@Name="StateText"]$</AlertParameter7>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="UnderThreshold" MonitorTypeStateID="UnderThresh" HealthState="Success" />
+          <OperationalState ID="OverThreshold" MonitorTypeStateID="OverThresh" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <!-- by default run every 15 minutes; set to lower values if detection needs to be faster.  -->
+          <!--     note that even with thresholds set to lower as 15 minutes this monitor will work as -->
+          <!--     it evaluates the total run time (for a finished task) as well as the current time  -->
+          <!--     (for a running task).                                                              -->
+          <IntervalSeconds>900</IntervalSeconds>
+          <SpreadInitializationOverInterval>900</SpreadInitializationOverInterval>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+          <Threshold>60</Threshold>
+          <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor">
+          <Name>Long running task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor.AlertMessage">
+          <Name><![CDATA[Scheduled Task is/was running too long]]> </Name>
+          <Description>The Scheduled Task {1} is running too long respectively took too long to complete.
+          
+ Task Scheduler Computer: {3}
+ Task Path: {0}
+ Task Description: {2}
+ 
+ Task State (when alert was triggered): {6}
+ Task Last Run Duration: {4}
+ Task Current Run Duration (when alert was triggered): {5}</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+             <KnowledgeArticle ElementID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Long running task monitor.</maml:para>
+              <maml:para>The monitor checks if a scheduled task is taking too long to complete. This monitor is disabled by default.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Use overrides to:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Enable the monitor</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Set the threshold (in minutes)</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The task is taking longer to complete than expected.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Consider optimizing the task so that it terminates faster</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Additional</maml:title>
+              <maml:para>This monitor will detect long running tasks reliably as long as they are not started more often than every 15 minutes.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+   
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

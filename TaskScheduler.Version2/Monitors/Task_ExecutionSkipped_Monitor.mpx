@@ -1,0 +1,90 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor" Accessibility="Public" Enabled="false" Target="Custom.TaskScheduler2.ScheduledTask" ParentMonitorID="Health!System.Health.AvailabilityState" Remotable="false" Priority="Normal" TypeID="Custom.TaskScheduler2.Task.ExecutionSkipped.MonitorType" ConfirmDelivery="false">
+        <Category>AvailabilityHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='Description']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4>
+           </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="NormalRun" MonitorTypeStateID="NoExecutionSkipped" HealthState="Success" />
+          <OperationalState ID="Skipped" MonitorTypeStateID="ExecutionSkipped" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+          <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor">
+          <Name>Next scheduled execution skipped</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor.AlertMessage">
+          <Name>Scheduled Task ran past next scheduled execution</Name>
+          <Description>The Scheduled Task {1}'s execution was skipped because and instance of the task was already running.
+
+Task Scheduler Computer: {3}
+Task Path: {0}
+Task Description: {2}</Description>
+
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Next scheduled execution skipped Monitor.</maml:para>
+              <maml:para>The monitor checks if a scheduled task's execution was skipped because it was still running at the time it should have been started.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Use overrides to:</maml:para>
+              <maml:para> - Disable the monitor</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The scheduled task is taking longer to complete than expected.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Reconfigure the scheduled task's schedule to accomodate for its execution duration.</maml:para>
+              <maml:para>Consider altering the task so that it terminates faster.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Additional</maml:title>
+              <maml:para>Monitor is based on Warning event 322 (Launch request ignored, instance already running) in the TaskScheduler log. It will return to green if:</maml:para>
+              <maml:para>-  The task is executed normally (no 322 event during a run)</maml:para>
+              <maml:para> - The task is disabled  </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>
