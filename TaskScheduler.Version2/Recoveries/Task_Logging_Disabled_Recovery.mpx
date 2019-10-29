@@ -1,0 +1,22 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Recoveries>
+      <Recovery ID="Custom.TaskScheduler2.Task.EnableTaskHistory.Recovery" Accessibility="Internal" Enabled="false" Target="Windows!Microsoft.Windows.OperatingSystem" Monitor="Custom.TaskSchedulerV2.EventLogEnabled.Monitor" ResetMonitor="false" ExecuteOnState="Warning" Remotable="true" Timeout="120">
+        <Category>Custom</Category>
+        <WriteAction ID="WA" TypeID="Custom.TaskScheduler2.Task.EnableTaskHistory.WriteAction">
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </WriteAction>
+      </Recovery>
+    </Recoveries>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.EnableTaskHistory.Recovery">
+          <Name>Enable "All Tasks History"</Name>
+          <Description>Enables Task Scheduler event log on Windows 2008 and later.</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

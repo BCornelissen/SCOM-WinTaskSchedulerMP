@@ -1,0 +1,242 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <MonitorTypes>
+      <!-- detects tasks running longer than expected (scheduled DS) -->
+      <!-- running on a schedule - will alert if either a running task is taking too long or an already terminated one took too long.
+                reset by ending task under threshold or manual reset
+      -->
+       <UnitMonitorType ID="Custom.TaskScheduler2.Task.LongRunningTask.MonitorType" Accessibility="Internal">
+        <MonitorTypeStates>
+          <MonitorTypeState ID="UnderThresh" NoDetection="false" />
+          <MonitorTypeState ID="OverThresh" NoDetection="false" />
+        </MonitorTypeStates>
+        <Configuration>
+          <xsd:element name="IntervalSeconds" type="xsd:integer" />
+          <xsd:element name="SpreadInitializationOverInterval" type="xsd:integer" />
+          <xsd:element name="ComputerName" type="xsd:string" />
+          <xsd:element name="TaskPath" type="xsd:string" />
+          <xsd:element name="Threshold" type="xsd:double" />
+          <xsd:element name="WindowsTasks" type="xsd:boolean"/>
+         <xsd:element name="Debug" type="xsd:boolean" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer"  />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SpreadInitializationOverInterval" Selector="$Config/SpreadInitializationOverInterval$" ParameterType="int" />
+          <OverrideableParameter ID="Debug" Selector="$Config/Debug$" ParameterType="bool" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="ThresholdMinutes" Selector="$Config/Threshold$" ParameterType="double" />
+        </OverrideableParameters>
+         <MonitorImplementation>
+           <MemberModules>
+             <DataSource ID="Scheduler" TypeID="System!System.UniquenessScheduler">
+               <Scheduler>
+                 <SimpleReccuringSchedule>
+                   <Interval Unit="Seconds">$Config/IntervalSeconds$</Interval>
+                    <SpreadInitializationOverInterval>$Config/SpreadInitializationOverInterval$</SpreadInitializationOverInterval>
+                 </SimpleReccuringSchedule>
+                 <ExcludeDates />
+               </Scheduler>
+               <UniquenessKey>$Config/ComputerName$</UniquenessKey>
+             </DataSource>
+             <ProbeAction ID="ScriptProbe" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.ScriptProbe">
+               <DiscoverWindowsTasks>$Config/WindowsTasks$</DiscoverWindowsTasks>
+               <!-- look back maximum 15 minutes -->
+               <LastRunDurationLookback>900</LastRunDurationLookback>
+               <Debug>$Config/Debug$</Debug>
+               <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+             </ProbeAction>
+             <ConditionDetection ID="UnderThreshold" TypeID="System!System.ExpressionFilter">
+               <Expression>
+                 <And>
+                   <Expression>
+                     <SimpleExpression>
+                       <ValueExpression>
+                         <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                       </ValueExpression>
+                       <Operator>Equal</Operator>
+                       <ValueExpression>
+                         <Value Type="String">$Config/TaskPath$</Value>
+                       </ValueExpression>
+                     </SimpleExpression>
+                   </Expression>
+                   <Expression>
+                     <Or>
+                       <Expression>
+                         <And>
+                           <Expression>
+                             <SimpleExpression>
+                               <ValueExpression>
+                                 <!-- how long the task took to complete on last run                    -->
+                                 <!--    if state is ready (3)                                           -->
+                                 <XPathQuery Type="Double">Property[@Name='LastRunDurationMinutes']</XPathQuery>
+                               </ValueExpression>
+                               <Operator>LessEqual</Operator>
+                               <ValueExpression>
+                                 <Value Type="Double">$Config/Threshold$</Value>
+                               </ValueExpression>
+                             </SimpleExpression>
+                           </Expression>
+                           <Expression>
+                             <SimpleExpression>
+                               <ValueExpression>
+                                 <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                               </ValueExpression>
+                               <Operator>Equal</Operator>
+                               <ValueExpression>
+                                 <Value Type="Integer">3</Value>
+                               </ValueExpression>
+                             </SimpleExpression>
+                           </Expression>
+                         </And>
+                       </Expression>
+                       <Expression>
+                         <RegExExpression>
+                           <ValueExpression>
+                             <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                           </ValueExpression>
+                           <Operator>MatchesRegularExpression</Operator>
+                           <Pattern>^(0|1)$</Pattern>
+                         </RegExExpression>
+                       </Expression>
+                       <Expression>
+                         <SimpleExpression>
+                           <ValueExpression>
+                             <XPathQuery Type="String">Property[@Name='LastRunTime']</XPathQuery>
+                           </ValueExpression>
+                           <Operator>NotEqual</Operator>
+                           <ValueExpression>
+                             <Value Type="String">HasDate</Value>
+                           </ValueExpression>
+                         </SimpleExpression>
+                       </Expression>
+                       <Expression>
+                         <RegExExpression>
+                           <ValueExpression>
+                             <XPathQuery Type="String">Property[@Name='TriggerText']</XPathQuery>
+                           </ValueExpression>
+                           <Operator>DoesNotContainSubstring</Operator>
+                           <Pattern>True: </Pattern>
+                         </RegExExpression>
+                       </Expression>
+                     </Or>
+                   </Expression>
+                 </And>
+               </Expression>
+             </ConditionDetection>
+             <ConditionDetection ID="OverThreshold" TypeID="System!System.ExpressionFilter">
+               <Expression>
+                 <And>
+                     <Expression>
+                       <SimpleExpression>
+                         <ValueExpression>
+                           <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                         </ValueExpression>
+                         <Operator>Equal</Operator>
+                         <ValueExpression>
+                           <Value Type="String">$Config/TaskPath$</Value>
+                         </ValueExpression>
+                       </SimpleExpression>
+                     </Expression>
+                     <Expression>
+                    <RegExExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='TriggerText']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>ContainsSubstring</Operator>
+                      <Pattern>True: </Pattern>
+                    </RegExExpression>
+                  </Expression>
+                   <Expression>
+                     <Or>
+                       <Expression>
+                         <And>
+                           <Expression>
+                         <SimpleExpression>
+                           <ValueExpression>
+                             <!-- how long the task is already running (in minutes)                  -->
+                             <!--     if it is currently running (State: 4)                           -->
+                             <XPathQuery Type="Double">Property[@Name='CurrentRunDurationMinutes']</XPathQuery>
+                           </ValueExpression>
+                           <Operator>Greater</Operator>
+                           <ValueExpression>
+                             <Value Type="Double">$Config/Threshold$</Value>
+                           </ValueExpression>
+                         </SimpleExpression>
+                           </Expression>
+                           <Expression>
+                             <SimpleExpression>
+                               <ValueExpression>
+                                 <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                               </ValueExpression>
+                               <Operator>Equal</Operator>
+                               <ValueExpression>
+                                 <Value Type="Integer">4</Value>
+                               </ValueExpression>
+                             </SimpleExpression>
+                           </Expression>
+                         </And>
+                       </Expression>
+                       <Expression>
+                         <And>
+                           <Expression>
+                         <SimpleExpression>
+                           <ValueExpression>
+                             <!-- how long the task took to complete on last run                    -->
+                             <!--    if state is ready (3)                                           -->
+                             <XPathQuery Type="Double">Property[@Name='LastRunDurationMinutes']</XPathQuery>
+                           </ValueExpression>
+                           <Operator>Greater</Operator>
+                           <ValueExpression>
+                             <Value Type="Double">$Config/Threshold$</Value>
+                           </ValueExpression>
+                         </SimpleExpression>
+                           </Expression>
+                           <Expression>
+                             <SimpleExpression>
+                               <ValueExpression>
+                                 <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                               </ValueExpression>
+                               <Operator>Equal</Operator>
+                               <ValueExpression>
+                                 <Value Type="Integer">3</Value>
+                               </ValueExpression>
+                             </SimpleExpression>
+                           </Expression>
+                         </And>
+                       </Expression>
+                     </Or>
+                   </Expression>
+                 </And>
+               </Expression>
+             </ConditionDetection> </MemberModules>
+          <RegularDetections>
+            <RegularDetection MonitorTypeStateID="UnderThresh">
+              <Node ID="UnderThreshold">
+                <Node ID="ScriptProbe">
+                  <Node ID="Scheduler" />
+                </Node>
+              </Node>
+            </RegularDetection>
+            <RegularDetection MonitorTypeStateID="OverThresh">
+              <Node ID="OverThreshold">
+                <Node ID="ScriptProbe">
+                <Node ID="Scheduler" />
+                </Node>
+              </Node>
+            </RegularDetection>
+          </RegularDetections>
+        </MonitorImplementation>
+      </UnitMonitorType>
+           </MonitorTypes>
+  </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LongRunningTask.MonitorType" SubElementID="ThresholdMinutes">
+          <Name>Threshold (minutes)</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

@@ -1,0 +1,349 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <MonitorTypes>
+      <!-- triggered by:
+       - task ending events (from 1005 in Operations Manager log)
+       - task configuration (1006)
+       - hourly schedule (1004)
+       -->
+      <UnitMonitorType ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.MonitorType" Accessibility="Internal">
+        <MonitorTypeStates>
+          <MonitorTypeState ID="NoError" NoDetection="false" />
+          <MonitorTypeState ID="Error" NoDetection="false" />
+        </MonitorTypeStates>
+        <Configuration>
+          <xsd:element name="ComputerName" type="xsd:string" />
+          <xsd:element name="TaskPath" type="xsd:string" />
+          <xsd:element name="maxErrorCount" type="xsd:integer" />
+          <xsd:element name="WindowsTasks" type="xsd:boolean"/>
+          <xsd:element name="Debug" type="xsd:boolean" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer"  />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="maxErrorCount" Selector="$Config/maxErrorCount$" ParameterType="int" />
+          <OverrideableParameter ID="Debug" Selector="$Config/Debug$" ParameterType="bool" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <MonitorImplementation>
+          <MemberModules>
+            <!-- trigger on events: either agent start or after tasks have ended                                         -->
+            <!--     the latter are written by the rule Custom.TaskScheduler2.Task.TaskActionObserved.EventCreation.Rule -->
+            <DataSource ID="EventDS" TypeID="Custom.TaskScheduler2.Task.RepeatedEvent.DS">
+              <ComputerName>$Config/ComputerName$</ComputerName>
+              <LogName>Operations Manager</LogName>
+              <Expression>
+                <Or>
+                  <Expression>
+                    <And>
+                      <Expression>
+                        <RegExExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="UnsignedInteger">EventDisplayNumber</XPathQuery>
+                          </ValueExpression>
+                          <Operator>MatchesRegularExpression</Operator>
+                          <Pattern>^(1004|1005|1006)$</Pattern>
+                        </RegExExpression>
+                      </Expression>
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">PublisherName</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">Health Service Script</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <!-- Script Name -->
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Params/Param[2]</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">Custom.TaskScheduler2.Task.WorkflowTriggerEvent.ps1</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <!-- MP Name -->
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Params/Param[4]</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">Custom.Windows.TaskScheduler.Windows2008.Monitoring</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <!-- Management Group Name -->
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">$Target/ManagementGroup/Name$</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                    </And>
+                  </Expression>
+                  <Expression>
+                    <And>
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="UnsignedInteger">EventDisplayNumber</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="UnsignedInteger">2002</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">PublisherName</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">HealthService</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <!-- Management Group Name -->
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Params/Param[1]</XPathQuery>
+                          </ValueExpression>
+                          <Operator>Equal</Operator>
+                          <ValueExpression>
+                            <Value Type="String">$Target/ManagementGroup/Name$</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                    </And>
+                  </Expression>
+                </Or>
+              </Expression>
+              <Consolidator>
+                <ConsolidationProperties />
+                <TimeControl>
+                  <!-- wait for delayed events -->
+                  <Latency>10</Latency>
+                  <!-- don't wait for backlogged items -->
+                  <DrainWait>0</DrainWait>
+                  <WithinTimeSchedule>
+                    <!-- don't call script more than once 10 seconds -->
+                    <Interval>10</Interval>
+                  </WithinTimeSchedule>
+                </TimeControl>
+                <!-- output only after the latency has passed -->
+                <!--     will output any input item (if any) that has happened -->
+                <CountingCondition>
+                  <CountMode>OnNewItemNOP_OnTimerOutputRestart</CountMode>
+                </CountingCondition>
+              </Consolidator>
+            </DataSource>
+            <ProbeAction ID="ScriptProbe" TypeID="Custom.TaskScheduler2.Task.GetTaskProperties.ScriptProbe">
+              <!-- return any task; in case they've been discovered they'll be monitored as well -->
+              <DiscoverWindowsTasks>$Config/WindowsTasks$</DiscoverWindowsTasks>
+              <!-- look back maximum 15 minutes -->
+              <LastRunDurationLookback>900</LastRunDurationLookback>
+              <Debug>$Config/Debug$</Debug>
+              <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+            </ProbeAction>
+
+            <!-- Task is: Ready AND has run in the past AND LastTaskResult is valid-->
+            <!--       OR                                                       -->
+            <!--     Unknown/Disabled                                           -->
+            <!--     has never run                                              -->
+            <!--     has no active triggers                                     -->
+            <ConditionDetection ID="ExceptionCountOK" TypeID="System!System.ExpressionFilter">
+              <Expression>
+                <And>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value Type="String">$Config/TaskPath$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <Or>
+                      <Expression>
+                        <And>
+                          <Expression>
+                            <SimpleExpression>
+                              <ValueExpression>
+                                <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                              </ValueExpression>
+                              <Operator>Equal</Operator>
+                              <ValueExpression>
+                                <Value Type="Integer">3</Value>
+                              </ValueExpression>
+                            </SimpleExpression>
+                          </Expression>
+                          <Expression>
+                            <SimpleExpression>
+                              <ValueExpression>
+                                <XPathQuery Type="String">Property[@Name='LastRunTime']</XPathQuery>
+                              </ValueExpression>
+                              <Operator>Equal</Operator>
+                              <ValueExpression>
+                                <Value Type="String">HasDate</Value>
+                              </ValueExpression>
+                            </SimpleExpression>
+                          </Expression>
+                          <Expression>
+                            <SimpleExpression>
+                              <ValueExpression>
+                                <XPathQuery Type="String">Property[@Name='PSJobErrorCount']</XPathQuery>
+                              </ValueExpression>
+                              <Operator>LessEqual</Operator>
+                              <ValueExpression>
+                                <Value>$Config/maxErrorCount$</Value>
+                              </ValueExpression>
+                            </SimpleExpression>
+                          </Expression>
+                        </And>
+                      </Expression>
+                      <Expression>
+                        <RegExExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                          </ValueExpression>
+                          <Operator>MatchesRegularExpression</Operator>
+                          <Pattern>^(0|1)$</Pattern>
+                        </RegExExpression>
+                      </Expression>
+                      <Expression>
+                        <SimpleExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Property[@Name='LastRunTime']</XPathQuery>
+                          </ValueExpression>
+                          <Operator>NotEqual</Operator>
+                          <ValueExpression>
+                            <Value Type="String">HasDate</Value>
+                          </ValueExpression>
+                        </SimpleExpression>
+                      </Expression>
+                      <Expression>
+                        <RegExExpression>
+                          <ValueExpression>
+                            <XPathQuery Type="String">Property[@Name='TriggerText']</XPathQuery>
+                          </ValueExpression>
+                          <Operator>DoesNotContainSubstring</Operator>
+                          <Pattern>True: </Pattern>
+                        </RegExExpression>
+                      </Expression>
+                    </Or>
+                  </Expression>
+                </And>
+              </Expression>
+            </ConditionDetection>
+            <!-- Task is: Ready AND has run in the past AND LastTaskResult is not valid-->
+            <!--       AND                                                              -->
+            <!--     has run                                                           -->
+            <!--     has active triggers                                                -->
+            <ConditionDetection ID="ExceptionCountHigh" TypeID="System!System.ExpressionFilter">
+              <Expression>
+                <And>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='Path']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value Type="String">$Config/TaskPath$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="Integer">Property[@Name='State']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value Type="Integer">3</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='LastRunTime']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value Type="String">HasDate</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='PSJobErrorCount']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>Greater</Operator>
+                      <ValueExpression>
+                        <Value>$Config/maxErrorCount$</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                  <Expression>
+                    <RegExExpression>
+                      <ValueExpression>
+                        <XPathQuery Type="String">Property[@Name='TriggerText']</XPathQuery>
+                      </ValueExpression>
+                      <Operator>ContainsSubstring</Operator>
+                      <Pattern>True: </Pattern>
+                    </RegExExpression>
+                  </Expression>
+                </And>
+              </Expression>
+            </ConditionDetection>
+          </MemberModules>
+          <RegularDetections>
+            <RegularDetection MonitorTypeStateID="NoError">
+              <Node ID="ExceptionCountOK">
+                <Node ID="ScriptProbe">
+                  <Node ID="EventDS" />
+                </Node>
+              </Node>
+            </RegularDetection>
+            <RegularDetection MonitorTypeStateID="Error">
+              <Node ID="ExceptionCountHigh">
+                <Node ID="ScriptProbe">
+                  <Node ID="EventDS" />
+                </Node>
+              </Node>
+            </RegularDetection>
+          </RegularDetections>
+        </MonitorImplementation>
+      </UnitMonitorType>
+    </MonitorTypes>
+  </TypeDefinitions>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.MonitorType" SubElementID="maxErrorCount">
+          <Name>max. Error Count</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

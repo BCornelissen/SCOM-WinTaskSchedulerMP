@@ -1,0 +1,86 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor" Accessibility="Public" Enabled="false" Target="Custom.TaskScheduler2.ScheduledTask" ParentMonitorID="Health!System.Health.ConfigurationState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NextRun.MonitorType" ConfirmDelivery="false">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='Description']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4>
+            <AlertParameter5>$Data/Context/Property[@Name="NextRunTime"]$</AlertParameter5>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="HasDate" MonitorTypeStateID="HasDate" HealthState="Success" />
+          <OperationalState ID="Never" MonitorTypeStateID="Never" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+          <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+     </Overrides>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor">
+          <Name>Next Run Defined Monitor</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor.AlertMessage">
+          <Name>Scheduled Task's schedule expired</Name>
+          <Description>The Scheduled Task '{1}' has a next run property of: {4}. The task will not run again until its schedule is updated.
+
+ Task Scheduler Computer: {3}
+ Task Path: {0}
+ Task Description: {2}</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Windows Scheduled Task Next Run Defined Monitor.</maml:para>
+              <maml:para>The monitor checks the next run time of a scheduled taks every minute.</maml:para>
+              <maml:para>'Never' is considered a warning condition for an enabled scheduled task.</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Use overrides to:</maml:para>
+              <maml:para> - Disable the monitor</maml:para>
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The task's schedule has expired</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Reconfigure the Scheduled Task</maml:para>
+              <maml:para>Disable or delete the Scheduled Task</maml:para>
+              <maml:para />
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

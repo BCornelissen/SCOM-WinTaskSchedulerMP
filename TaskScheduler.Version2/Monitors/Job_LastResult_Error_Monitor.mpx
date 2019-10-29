@@ -1,0 +1,134 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Monitors>
+      <UnitMonitor ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Accessibility="Public" Enabled="true" Target="Custom.TaskScheduler2.Task" ParentMonitorID="Health!System.Health.AvailabilityState" Remotable="false" Priority="Normal" TypeID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.MonitorType" ConfirmDelivery="false">
+        <Category>AvailabilityHealth</Category>
+        <AlertSettings AlertMessage="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='Path']$</AlertParameter1>
+            <AlertParameter2>$Data/Context/Property[@Name='Name']$</AlertParameter2>
+            <AlertParameter3>$Data/Context/Property[@Name='User']$</AlertParameter3>
+            <AlertParameter4>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</AlertParameter4>
+            <AlertParameter5>$Data/Context/Property[@Name="PSJobErrorCount"]$</AlertParameter5>
+            <AlertParameter6>$Data/Context/Property[@Name="PSJobErrorContent"]$</AlertParameter6>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="NoError" MonitorTypeStateID="NoError" HealthState="Success" />
+          <OperationalState ID="Error" MonitorTypeStateID="Error" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+          <TaskPath>$Target/Property[Type="SchTaskLib!Custom.Windows.TaskSchedulerTask"]/TaskPath$</TaskPath>
+          <!-- by default do not tolerate any errors -->
+          <maxErrorCount>0</maxErrorCount>
+          <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
+          <Debug>false</Debug>
+          <TimeoutSeconds>300</TimeoutSeconds>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+      <!-- disable monitor on classic tasks -->
+      <MonitorPropertyOverride ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.Disable.Override_for_Custom.TaskScheduler2.Task" Context="Custom.TaskScheduler2.Task" Enforced="false" Monitor="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <!-- re-enable for PSScheduledJobs -->
+      <MonitorPropertyOverride ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.Enable.Override_for_Custom.PSScheduledJob.Job" Context="Custom.PSScheduledJob.Job" Enforced="false" Monitor="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Property="Enabled">
+        <Value>true</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.Enable.Override_for_Custom.PSScheduledJob.ScheduledJob" Context="Custom.PSScheduledJob.ScheduledJob" Enforced="false" Monitor="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Property="Enabled">
+        <Value>true</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <StringResources>
+      <StringResource ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.AlertMessage" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor">
+          <Name>Last Result Successful Monitor - PSJob Error Count</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor.AlertMessage">
+          <Name>PS Scheduled Job failed to complete successfully</Name>
+          <Description>Last execution of PowerShell Scheduled Job '{1}' returned {4} errors. It did not run successfully.
+
+Task Scheduler Computer: {3}
+Task Path: {0}
+Job Name: {1}
+Job User: {2}
+
+Error Count: {4}
+Error Summary: {5}</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>PowerShell Scheduled Job Last Result Monitor.</maml:para>
+              <maml:para>The monitor checks the last result of a PowerShell Scheduled Job for error items (exceptions).</maml:para>
+              <maml:para>Any error observed is considered a warning condition for scheduled job with trigger(s).</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>Use overrides to:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Disable the monitor</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Allow a number of exceptions to be considered a healthy condition.</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para />
+              <maml:para />
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The PowerShell script called by the Scheduled Job threw exceptions.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Log onto the affected computer as the user that created the PowerShell Scheduled Job and run the following PowerShell command to get access to the job's last result:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Get-Job -Name "name of the job" -Newest 1</maml:para>
+                  <maml:para>gets the latest result object of a scheduled job, including the script code that ran.</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>This allows further investigating why the script did not complete sucessfully. Refer to the "Additional" section in case changes to the job are required.</maml:para>
+              <maml:para>
+                and/or <maml:navigationLink>
+                  <maml:linkText>Re-run Scheduled Job</maml:linkText>
+                  <maml:uri condition="Task" href="SchTaskLib!Custom.Windows.ScheduledTask.RunTask&amp;tasktarget={$TARGET$}" uri="MOM.Console.Exe" />
+                </maml:navigationLink>
+              </maml:para>
+              <maml:para>Disable or delete the PowerShell Scheduled Job</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Additional</maml:title>
+              <maml:para>TechNet documentation regarding PSScheduledJob:</maml:para>
+              <maml:para>
+                -
+                <maml:navigationLink>
+                  <maml:linkText>Windows PowerShell Scheduled Job Cmdlets</maml:linkText>
+                  <maml:uri href="http://technet.microsoft.com/en-us/library/hh849778%28v=wps.620%29.aspx" />
+                </maml:navigationLink>
+              </maml:para>
+             </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

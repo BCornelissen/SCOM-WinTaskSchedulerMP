@@ -1,0 +1,27 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Overrides>
+      <MonitorPropertyOverride ID="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.Windows.ScheduledTaskV2.PSScheduledJob.LastResult_Error.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.TaskScheduler2.Task.ExecutionSkipped.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.TaskScheduler2.Task.LastResult.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.TaskScheduler2.Task.LastResult.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.TaskScheduler2.Task.LongRunningTask.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.TaskScheduler2.Task.LongRunningTask.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.Windows.ScheduledTaskV2.DiscoveryData.NoTriggers.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.TaskScheduler2.Task.LastResult.NextRun.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Custom.TaskSchedulerV2.EventLogEnabled.Monitor_DisableGroup_Override" Context="SchTaskLib!Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Enforced="false" Monitor="Custom.TaskSchedulerV2.EventLogEnabled.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+</ManagementPackFragment>

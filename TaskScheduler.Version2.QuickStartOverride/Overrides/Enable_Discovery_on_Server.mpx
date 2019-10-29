@@ -1,0 +1,22 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Overrides>
+      <!-- enable all four discoveries for Windows Server -->
+      <!--     note that workflow won't run on Windows Server 2003 or when no PowerShell is installed. -->
+      <!--     the discovery's datasource conatins a blocking condition for that case.                 -->
+      <DiscoveryPropertyOverride ID="Custom.TaskScheduler2.Task.DiscoverByScript.QuickStartOverride.Server" Context="Windows!Microsoft.Windows.Server.Computer" Enforced="false" Discovery="TaskV2!Custom.TaskScheduler2.Task.DiscoverByScript" Property="Enabled">
+        <Value>true</Value>
+      </DiscoveryPropertyOverride>
+      <DiscoveryPropertyOverride ID="Custom.TaskScheduler2.ScheduledTask.DiscoverByScript.Server" Context="Windows!Microsoft.Windows.Server.Computer" Enforced="false" Discovery="TaskV2!Custom.TaskScheduler2.ScheduledTask.DiscoverByScript" Property="Enabled">
+        <Value>true</Value>
+      </DiscoveryPropertyOverride>
+      <DiscoveryPropertyOverride ID="Custom.PSScheduledJob.Job.DiscoverByScript.Server" Context="Windows!Microsoft.Windows.Server.Computer" Enforced="false" Discovery="TaskV2!Custom.PSScheduledJob.Job.DiscoverByScript" Property="Enabled">
+        <Value>true</Value>
+      </DiscoveryPropertyOverride>
+      <DiscoveryPropertyOverride ID="Custom.PSScheduledJob.ScheduledJob.DiscoverByScript.Server" Context="Windows!Microsoft.Windows.Server.Computer" Enforced="false" Discovery="TaskV2!Custom.PSScheduledJob.ScheduledJob.DiscoverByScript" Property="Enabled">
+        <Value>true</Value>
+      </DiscoveryPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  
+</ManagementPackFragment>

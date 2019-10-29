@@ -1,0 +1,47 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Rules>
+      <!-- creates an event log entry when the task actions were observed       -->
+      <!--     enabled via internal override on computers with tasks discovered -->
+      <Rule ID="Custom.TaskScheduler2.Task.TaskConfigurationObserved.EventCreation.Rule" Enabled="false" Target="SC!Microsoft.SystemCenter.HealthService" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>Operations</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Custom.TaskScheduler2.Task.RepeatedEvent_TaskConfigurationObserved.DS">
+            <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/PrincipalName$</ComputerName>
+            <ConsolidationSeconds>300</ConsolidationSeconds>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteEvent" TypeID="Custom.TaskScheduler2.Task.WorkflowTriggerEvent.WriteAction">
+            <WaitTime>120</WaitTime>
+            <ManagementPackName>Custom.Windows.TaskScheduler.Windows2008.Monitoring</ManagementPackName>
+            <ManagementGroupName>$Target/ManagementGroup/Name$</ManagementGroupName>
+            <EventId>1006</EventId>
+            <EventType>TaskConfigurationChanged</EventType>
+            <EventCount>$Data/Count$</EventCount>
+            <TimeWindowStart>$Data/TimeWindowStart$</TimeWindowStart>
+            <TimeWindowEnd>$Data/TimeWindowEnd$</TimeWindowEnd>
+            <TimeoutSeconds>300</TimeoutSeconds>
+          </WriteAction>
+        </WriteActions>
+      </Rule>
+    </Rules>
+    <Overrides>
+      <!-- enable only on computers that have tasks discovered -->
+      <RulePropertyOverride ID="Custom.TaskScheduler2.Task.TaskConfigurationObserved.EventCreation.Rule.Override.for.Task2ComputerGroup" Context="Custom.TaskScheduler2.Task.ComputerGroup" Enforced="false" Rule="Custom.TaskScheduler2.Task.TaskConfigurationObserved.EventCreation.Rule" Property="Enabled">
+        <Value>true</Value>
+      </RulePropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.TaskScheduler2.Task.TaskConfigurationObserved.EventCreation.Rule">
+          <Name>Task Scheduler Configuration Change Observer Rule</Name>
+          <Description>Consolidated rule that writes an event to the 'Operations Manager' event log after task scheduler configuration has changed. Looks for events in the Microsoft-Windows-TaskScheduler event log.</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>

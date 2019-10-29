@@ -1,0 +1,96 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TypeDefinitions>
+    <MonitorTypes>
+      <UnitMonitorType ID="Custom.Windows.TaskSchedulerV2.Registry2StateMonitorType" Accessibility="Internal">
+        <MonitorTypeStates>
+          <MonitorTypeState ID="FirstCondition" />
+          <MonitorTypeState ID="SecondCondition" />
+        </MonitorTypeStates>
+        <Configuration>
+          <IncludeSchemaTypes>
+            <SchemaType>System!System.ExpressionEvaluatorSchema</SchemaType>
+            <SchemaType>Windows!Microsoft.Windows.RegistryAttributeDefinitionsSchema</SchemaType>
+          </IncludeSchemaTypes>
+          <xsd:element name="ComputerName" type="xsd:string" />
+          <xsd:element name="WindowsVersionRegEx" type="xsd:string" />
+          <xsd:element name="RegistryAttributeDefinitions" type="RegistryAttributeDefinitionsType" />
+          <xsd:element name="Frequency" type="xsd:unsignedInt" />
+          <xsd:element name="FirstExpression" type="ExpressionType" />
+          <xsd:element name="SecondExpression" type="ExpressionType" />
+        </Configuration>
+        <MonitorImplementation>
+          <MemberModules>
+            <DataSource TypeID="System!System.Scheduler" ID="Scheduler">
+                <Scheduler>
+                  <SimpleReccuringSchedule>
+                    <Interval Unit="Seconds">$Config/Frequency$</Interval>
+                  </SimpleReccuringSchedule>
+                  <ExcludeDates />
+                </Scheduler>
+              </DataSource>
+              
+            <ProbeAction TypeID="Windows!Microsoft.Windows.RegistryProbe" ID="Probe1">
+              <ComputerName>$Config/ComputerName$</ComputerName>
+              <RegistryAttributeDefinitions>
+                <!-- Windows Version -->
+                <RegistryAttributeDefinition>
+                  <AttributeName>CurrentVersion</AttributeName>
+                  <Path>SOFTWARE\Microsoft\Windows NT\CurrentVersion\CurrentVersion</Path>
+                  <PathType>1</PathType>
+                  <AttributeType>1</AttributeType>
+                  <RegistryView>Default</RegistryView>
+                </RegistryAttributeDefinition>
+            </RegistryAttributeDefinitions>
+        </ProbeAction>
+
+            <ProbeAction TypeID="Windows!Microsoft.Windows.RegistryProbe" ID="Probe2">
+              <ComputerName>$Config/ComputerName$</ComputerName>
+              <RegistryAttributeDefinitions>$Config/RegistryAttributeDefinitions$</RegistryAttributeDefinitions>
+            </ProbeAction>
+             <ConditionDetection TypeID="System!System.ExpressionFilter" ID="OSFilter">
+                    <Expression>
+                       <RegExExpression>
+                          <ValueExpression>
+                                <XPathQuery Type="String">Values/CurrentVersion</XPathQuery>
+                              </ValueExpression>
+                              <Operator>MatchesRegularExpression</Operator>
+                              <Pattern>$Config/WindowsVersionRegEx$</Pattern>
+                            </RegExExpression>
+                          </Expression>
+            </ConditionDetection>
+            <ConditionDetection TypeID="System!System.ExpressionFilter" ID="FirstFilterCondition">
+                  <Expression>$Config/FirstExpression$</Expression>
+            </ConditionDetection>
+            <ConditionDetection TypeID="System!System.ExpressionFilter" ID="SecondFilterCondition">
+                  <Expression>$Config/SecondExpression$</Expression>
+            </ConditionDetection>
+          </MemberModules>
+          <RegularDetections>
+            <RegularDetection MonitorTypeStateID="FirstCondition">
+              <Node ID="FirstFilterCondition">
+                <Node ID="Probe2">
+                  <Node ID="OSFilter">
+                    <Node ID="Probe1">
+                      <Node ID="Scheduler" />
+                    </Node>
+                  </Node>
+                </Node>
+              </Node>
+            </RegularDetection>
+            <RegularDetection MonitorTypeStateID="SecondCondition">
+              <Node ID="SecondFilterCondition">
+                <Node ID="Probe2">
+                  <Node ID="OSFilter">
+                    <Node ID="Probe1">
+                      <Node ID="Scheduler" />
+                    </Node>
+                  </Node>
+                </Node>
+              </Node>
+            </RegularDetection>
+          </RegularDetections>
+        </MonitorImplementation>
+      </UnitMonitorType>
+    </MonitorTypes>
+  </TypeDefinitions>
+</ManagementPackFragment>

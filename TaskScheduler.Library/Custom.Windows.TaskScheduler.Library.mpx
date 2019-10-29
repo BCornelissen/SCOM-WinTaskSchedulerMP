@@ -1,0 +1,627 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--  -->
+<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="Custom.Windows.TaskSchedulerTask" Accessibility="Public" Abstract="true" Base="Windows!Microsoft.Windows.ApplicationComponent" Hosted="true" Singleton="false">
+          <Property ID="TaskName" Type="string" Key="false" CaseSensitive="false" MinLength="1" MaxLength="256" />
+          <Property ID="TaskPath" Type="string" Key="true" CaseSensitive="false" MinLength="1" MaxLength="2048"/>
+          <Property ID="TaskDescription" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="2048"/>
+          <Property ID="TaskLastResult" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="64" />
+          <Property ID="TaskLastRunTime" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="128" />
+          <Property ID="TaskNextRunTime" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="128" />
+          <Property ID="TaskStatus" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="128" />
+          <Property ID="TaskUser" Type="string" Key="false" CaseSensitive="false" MinLength="0" MaxLength="128" />
+        </ClassType>
+        <ClassType ID="Custom.Windows.TaskSchedulerTask.Group" Accessibility="Public" Abstract="true" Base="System!System.Group" Hosted="false" Singleton="false" />
+
+        <ClassType ID="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" Accessibility="Public" Abstract="false" Base="InstanceGroupLibrary!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" />
+        
+      </ClassTypes>
+      <RelationshipTypes>
+        <RelationshipType ID="Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" Accessibility="Public" Abstract="false" Base="System!System.Hosting">
+          <Source ID="Source" Type="Windows!Microsoft.Windows.Computer" />
+          <Target ID="Target" Type="Custom.Windows.TaskSchedulerTask" />
+        </RelationshipType>
+        <RelationshipType ID="Custom.Windows.TaskSchedulerTask.Group.Contains.Custom.Windows.TaskSchedulerTask" Accessibility="Public" Abstract="false" Base="System!System.Containment">
+          <Source ID="Source" Type="Custom.Windows.TaskSchedulerTask.Group" />
+          <Target ID="Target" Type="Custom.Windows.TaskSchedulerTask" />
+        </RelationshipType>
+      </RelationshipTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <Categories>
+    <Category ID="Cat.Custom.Windows.ScheduledTask.16x16Image" Target="Custom.Windows.ScheduledTask.16x16Image" Value="System!System.Internal.ManagementPack.Images.u16x16Icon" />
+    <Category ID="Cat.Custom.Windows.ScheduledTask.80x80Image" Target="Custom.Windows.ScheduledTask.80x80Image" Value="System!System.Internal.ManagementPack.Images.DiagramIcon" />
+  </Categories>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup.Discovery" Enabled="true" Target="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup" ConfirmDelivery="true" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="InstanceGroupLibrary!Microsoft.SystemCenter.InstanceGroupContainsEntities" />
+        </DiscoveryTypes>
+        <DataSource ID="Microsoft.SystemCenter.GroupPolulator" TypeID="SystemCenter!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="Custom.Windows.TaskSchedulerTask"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="InstanceGroupLibrary!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="Custom.Windows.TaskSchedulerTask"]/TaskDescription$</Property>
+                  </ValueExpression>
+                  <Operator>MatchesRegularExpression</Operator>
+                  <Pattern>(?i)_(disabled|DoNotMonitor)$</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Tasks>
+      <Task ID="Custom.Windows.ScheduledTask.DisableTask" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="true">
+        <Category>Custom</Category>
+        <WriteAction ID="PA" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/change /DISABLE /tn "$Target/Property[Type="Custom.Windows.TaskSchedulerTask"]/TaskPath$"</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Task>
+      <Task ID="Custom.Windows.ScheduledTask.EnableTask" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="true">
+        <Category>Custom</Category>
+        <WriteAction ID="PA" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/change /ENABLE /tn "$Target/Property[Type="Custom.Windows.TaskSchedulerTask"]/TaskPath$"</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Task>
+      <Task ID="Custom.Windows.ScheduledTask.EndTask" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="true">
+        <Category>Custom</Category>
+        <WriteAction ID="PA" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/end /tn "$Target/Property[Type="Custom.Windows.TaskSchedulerTask"]/TaskPath$"</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Task>
+      <Task ID="Custom.Windows.ScheduledTask.ListTasks" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="true" >
+        <Category>Custom</Category>
+        <WriteAction ID="PA" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/query /fo table</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Task>
+      <Task ID="Custom.Windows.ScheduledTask.RunTask" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" Timeout="300" Remotable="true">
+        <Category>Custom</Category>
+        <WriteAction ID="PA" TypeID="System!System.CommandExecuter">
+          <ApplicationName>schtasks.exe</ApplicationName>
+          <WorkingDirectory />
+          <CommandLine>/run /tn "$Target/Property[Type="Custom.Windows.TaskSchedulerTask"]/TaskPath$"</CommandLine>
+          <TimeoutSeconds>30</TimeoutSeconds>
+          <RequireOutput>true</RequireOutput>
+          <Files />
+        </WriteAction>
+      </Task>
+    </Tasks>
+    <Monitors>
+      <DependencyMonitor ID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.Monitor" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" ParentMonitorID="Health!System.Health.AvailabilityState" Remotable="true" Priority="Normal" RelationshipType="Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" MemberMonitor="Health!System.Health.AvailabilityState">
+        <Category>AvailabilityHealth</Category>
+        <Algorithm>WorstOf</Algorithm>
+      </DependencyMonitor>
+      <DependencyMonitor ID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.ConfigurationMonitor" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" ParentMonitorID="Health!System.Health.ConfigurationState" Remotable="true" Priority="Normal" RelationshipType="Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" MemberMonitor="Health!System.Health.ConfigurationState">
+        <Category>ConfigurationHealth</Category>
+        <Algorithm>WorstOf</Algorithm>
+      </DependencyMonitor>
+      <DependencyMonitor ID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.PerformanceMonitor" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" RelationshipType="Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask" MemberMonitor="Health!System.Health.PerformanceState">
+        <Category>PerformanceHealth</Category>
+        <Algorithm>WorstOf</Algorithm>
+      </DependencyMonitor>
+    </Monitors>
+  </Monitoring>
+  <Presentation>
+    <Views>
+      <View ID="Custom.Windows.ScheduledTask.PerfView" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" TypeID="SystemCenter!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>Windows Scheduled Tasks</Object>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <DynamicTimeTicks>3456000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>true</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="Custom.Windows.ScheduledTask.StateView" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" TypeID="SystemCenter!Microsoft.SystemCenter.StateViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <InMaintenanceMode>false</InMaintenanceMode>
+          <PropertyCriteria>
+            <PropertyName>DisplayName</PropertyName>
+             <Value>Task:%</Value>
+          </PropertyCriteria>
+        </Criteria>
+        <Presentation>
+          <ColumnInfo Index="0" SortIndex="0" Width="100" Grouped="false" Sorted="true" IsSortable="true" Visible="true" SortOrder="Descending">
+            <Name>State</Name>
+            <Id>Custom.Windows.TaskSchedulerTask</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="1" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Maintenance Mode</Name>
+            <Id>InMaintenanceMode</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Name</Name>
+            <Id>Name</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Path</Name>
+            <Id>Path</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="4" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Number</Name>
+            <Id>TaskNumber</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="5" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Name</Name>
+            <Id>TaskName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Last Result</Name>
+            <Id>TaskLastResult</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Last Run</Name>
+            <Id>TaskLastRunTime</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="8" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Next Run</Name>
+            <Id>TaskNextRunTime</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="9" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Status</Name>
+            <Id>TaskStatus</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="10" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Command</Name>
+            <Id>TaskCommand</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="11" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Schedule</Name>
+            <Id>TaskSchedule</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="12" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>User</Name>
+            <Id>TaskUser</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="13" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>State</Name>
+            <Id>TaskState</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="14" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Display Name</Name>
+            <Id>DisplayName</Id>
+          </ColumnInfo>
+        </Presentation>
+        <Target />
+      </View>
+       <View ID="Custom.Windows.PSScheduledJob.StateView" Accessibility="Public" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" TypeID="SystemCenter!Microsoft.SystemCenter.StateViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <InMaintenanceMode>false</InMaintenanceMode>
+          <PropertyCriteria>
+            <PropertyName>DisplayName</PropertyName>
+             <Value>PS Job:%</Value>
+          </PropertyCriteria>
+        </Criteria>
+        <Presentation>
+          <ColumnInfo Index="0" SortIndex="0" Width="100" Grouped="false" Sorted="true" IsSortable="true" Visible="true" SortOrder="Descending">
+            <Name>State</Name>
+            <Id>Custom.Windows.TaskSchedulerTask</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="1" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Maintenance Mode</Name>
+            <Id>InMaintenanceMode</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Name</Name>
+            <Id>Name</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Path</Name>
+            <Id>Path</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="4" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Number</Name>
+            <Id>TaskNumber</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="5" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Name</Name>
+            <Id>TaskName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Last Result</Name>
+            <Id>TaskLastResult</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Last Run</Name>
+            <Id>TaskLastRunTime</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="8" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Next Run</Name>
+            <Id>TaskNextRunTime</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="9" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Status</Name>
+            <Id>TaskStatus</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="10" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Task Command</Name>
+            <Id>TaskCommand</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="11" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Schedule</Name>
+            <Id>TaskSchedule</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="12" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>User</Name>
+            <Id>TaskUser</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="13" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>State</Name>
+            <Id>TaskState</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="14" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Display Name</Name>
+            <Id>DisplayName</Id>
+          </ColumnInfo>
+        </Presentation>
+        <Target />
+      </View>
+  
+     
+     <View ID="Custom.Windows.ScheduledTask.AlertView" Accessibility="Internal" Enabled="true" Target="Custom.Windows.TaskSchedulerTask" TypeID="SystemCenter!Microsoft.SystemCenter.AlertViewType" Visible="true">
+              <Category>Operations</Category>
+              <Criteria>
+                <ResolutionState>
+                  <StateRange Operator="NotEquals">255</StateRange>
+                </ResolutionState>
+                <!--
+                <PropertyCriteria>
+                  <PropertyName>DisplayName</PropertyName>
+                  <Value>Task:%</Value>
+                </PropertyCriteria>
+                -->
+              </Criteria>
+              <Presentation>
+                <ColumnInfo Index="0" SortIndex="-1" Width="22" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Severity</Name>
+                  <Id>Severity</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="1" SortIndex="-1" Width="54" Grouped="false" Sorted="false" IsSortable="false" Visible="true" SortOrder="Ascending">
+                  <Name>Icon</Name>
+                  <Id>Icon</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Path</Name>
+                  <Id>MonitoringObjectPath</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Source</Name>
+                  <Id>MonitoringObjectDisplayName</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="4" SortIndex="-1" Width="22" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Maintenance Mode</Name>
+                  <Id>MonitoringObjectInMaintenanceMode</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="5" SortIndex="-1" Width="250" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Name</Name>
+                  <Id>Name</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Resolution State</Name>
+                  <Id>ResolutionState</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="7" SortIndex="-1" Width="150" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Created</Name>
+                  <Id>TimeRaised</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="8" SortIndex="0" Width="100" Grouped="false" Sorted="true" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Age</Name>
+                  <Id>Age</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="9" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Type</Name>
+                  <Id>Category</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="10" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Owner</Name>
+                  <Id>Owner</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="11" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Priority</Name>
+                  <Id>Priority</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="12" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Latency</Name>
+                  <Id>Latency</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="13" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Description</Name>
+                  <Id>Description</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="14" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Connector</Name>
+                  <Id>ConnectorId</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="15" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Forwarding Status</Name>
+                  <Id>ConnectorStatus</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="16" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Class</Name>
+                  <Id>Class</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="17" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Time in State</Name>
+                  <Id>TimeInState</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="18" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 1</Name>
+                  <Id>CustomField1</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="19" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 2</Name>
+                  <Id>CustomField2</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="20" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 3</Name>
+                  <Id>CustomField3</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="21" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 4</Name>
+                  <Id>CustomField4</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="22" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 5</Name>
+                  <Id>CustomField5</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="23" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 6</Name>
+                  <Id>CustomField6</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="24" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 7</Name>
+                  <Id>CustomField7</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="25" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 8</Name>
+                  <Id>CustomField8</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="26" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 9</Name>
+                  <Id>CustomField9</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="27" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Custom Field 10</Name>
+                  <Id>CustomField10</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="28" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Resolved By</Name>
+                  <Id>ResolvedBy</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="29" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Time Resolved</Name>
+                  <Id>TimeResolved</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="30" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Last State Change</Name>
+                  <Id>TimeResolutionStateLastModified</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="31" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Last Modified</Name>
+                  <Id>LastModified</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="32" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+                  <Name>Last Modified By</Name>
+                  <Id>LastModifiedBy</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="33" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Management Group</Name>
+                  <Id>ManagementGroup</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="34" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Site</Name>
+                  <Id>SiteName</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="35" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Repeat Count</Name>
+                  <Id>RepeatCount</Id>
+                </ColumnInfo>
+                <ColumnInfo Index="36" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+                  <Name>Ticket ID</Name>
+                  <Id>TicketId</Id>
+                </ColumnInfo>
+              </Presentation>
+              <Target />
+            </View>
+       </Views>
+    <Folders>
+      <Folder ID="Custom.Windows.ScheduledTask.Folder" Accessibility="Public" ParentFolder="WindowsServerLib!Microsoft.Windows.Server.ViewFolder.Root" />
+    </Folders>
+    <FolderItems>
+      <FolderItem ElementID="Custom.Windows.ScheduledTask.PerfView" Folder="Custom.Windows.ScheduledTask.Folder" ID="Id_0" />
+      <FolderItem ElementID="Custom.Windows.ScheduledTask.StateView" Folder="Custom.Windows.ScheduledTask.Folder" ID="Id_1" />
+      <FolderItem ElementID="Custom.Windows.PSScheduledJob.StateView" Folder="Custom.Windows.ScheduledTask.Folder" ID="Id_3" />
+      <FolderItem ElementID="Custom.Windows.ScheduledTask.AlertView" Folder="Custom.Windows.ScheduledTask.Folder" ID="Id_4" />
+
+    </FolderItems>
+    <ImageReferences>
+      <ImageReference ElementID="Custom.Windows.TaskSchedulerTask" ImageID="Custom.Windows.ScheduledTask.16x16Image" />
+      <ImageReference ElementID="Custom.Windows.TaskSchedulerTask" ImageID="Custom.Windows.ScheduledTask.80x80Image" />
+    </ImageReferences>
+   </Presentation>
+  <Reporting />
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Microsoft.Windows.Computer.Hosts.Custom.Windows.TaskSchedulerTask">
+          <Name>Windows Computer hosts Task Scheduler Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask">
+          <Name>Scheduler Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskLastResult">
+          <Name>Last Result (legacy)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskDescription">
+          <Name>Description</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskLastRunTime">
+          <Name>Last Run</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskName">
+          <Name>Task Name</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskPath">
+          <Name>Task Path</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskNextRunTime">
+          <Name>Next Run</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskStatus">
+          <Name>Status</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask" SubElementID="TaskUser">
+          <Name>User</Name>
+        </DisplayString>
+
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup">
+          <Name>Monitoring disabled Scheduler Task group</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskSchedulerTask.MonitoringDisabledGroup.Discovery">
+          <Name>Containment discovery for the Monitoring disabled Scheduler Task group</Name>
+        </DisplayString>
+        
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.DisableTask">
+          <Name>Disable Scheduled Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.EnableTask">
+          <Name>Enable Scheduled Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.EndTask">
+          <Name>End Scheduled Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.Folder">
+          <Name>Scheduled Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.ListTasks">
+          <Name>List All Scheduled Tasks</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.TaskScheduler.Library">
+          <Name>Windows Task Scheduler Library</Name>
+          <Description>Windows Task Scheduler Classes and Types</Description>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.PerfView">
+          <Name>Scheduled Task Job Duration</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.RunTask">
+          <Name>Run Scheduled Task</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.StateView">
+          <Name>Scheduled Task State</Name>
+        </DisplayString>
+         <DisplayString ElementID="Custom.Windows.PSScheduledJob.StateView">
+          <Name>Scheduled PS Job State</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.AlertView">
+          <Name>Scheduled Task Alerts</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.Monitor">
+          <Name>Windows Scheduled Task Availability Health Rollup</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.ConfigurationMonitor">
+          <Name>Windows Scheduled Task Configuration Health Rollup</Name>
+        </DisplayString>
+        <DisplayString ElementID="Custom.Windows.ScheduledTask.to.Microsoft.Windows.Computer.Dependency.PerformanceMonitor">
+          <Name>Windows Scheduled Task Performance Health Rollup</Name>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Custom.Windows.TaskSchedulerTask" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This class is the base for all discovered Scheduled Tasks</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+  <Resources>
+    <Image ID="Custom.Windows.ScheduledTask.16x16Image" Accessibility="Public" FileName="Custom.Windows.ScheduledTask.16x16Image.png"></Image>
+    <Image ID="Custom.Windows.ScheduledTask.80x80Image" Accessibility="Public" FileName="Custom.Windows.ScheduledTask.80x80Image.png"></Image>
+  </Resources>
+</ManagementPackFragment>
