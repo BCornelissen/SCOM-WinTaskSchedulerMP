@@ -27,10 +27,11 @@
           <!--  0                                  -->
           <!--  1        (exit code of popup boxes)-> use in override only -->
           <!--  267009   (currently running)       -->
+          <!--  267011   (The task has not yet run) -->
           <!--  267014   (terminated by user       -->
           <!--  267045   (queued)                  -->
           <!-- -2147216609 (instance of this task already running) -> being taken care of by the separate monitor -->
-          <DesiredReturnCode>^(0|267009|267014|267045|-2147216609)$</DesiredReturnCode>
+          <DesiredReturnCode>^(0|267009|267011|267014|267045|-2147216609)$</DesiredReturnCode>
           <WindowsTasks>$Target/Property[Type="Custom.TaskScheduler2.Task"]/WinTasksDiscovered$</WindowsTasks>
           <Debug>false</Debug>
           <TimeoutSeconds>300</TimeoutSeconds>

@@ -6,7 +6,7 @@
     <RootNamespace>_2008QuickStartOverride</RootNamespace>
     <Name>Windows Task Scheduler and PS Job Monitoring - Quick Start Overrides</Name>
     <ManagementPackName>Custom.Windows.TaskScheduler.Windows2008.QuickStartOR</ManagementPackName>
-    <Version>1.2.0.500</Version>
+    <Version>1.2.2.2</Version>
     <MpFrameworkVersion>v7.0</MpFrameworkVersion>
     <MpFrameworkProfile>OM</MpFrameworkProfile>
     <ProductVersion>1.1.0.0</ProductVersion>
