@@ -1,0 +1,12 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Custom.Windows.TaskScheduler.Windows2008.QuickStartOR">
+          <Name>Windows Task Scheduler and PS Job Monitoring - Quick Start Overrides</Name>
+          <Description>Enables the discovery of Scheduled Tasks and PS Scheduled Jobs on Windows Server 2008 and Higher.</Description>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>
