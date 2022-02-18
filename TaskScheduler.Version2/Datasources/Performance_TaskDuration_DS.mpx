@@ -184,11 +184,11 @@
                     <Expression>
                   <SimpleExpression>
                     <ValueExpression>
-                      <XPathQuery Type="Double">Property[@Name='LastRunDurationMinutes']</XPathQuery>
+                      <XPathQuery Type="Integer">Property[@Name='LastRunDurationMinutes']</XPathQuery>
                     </ValueExpression>
                     <Operator>GreaterEqual</Operator>
                     <ValueExpression>
-                      <Value Type="Double">0</Value>
+                      <Value Type="Integer">0</Value>
                     </ValueExpression>
                   </SimpleExpression>
                     </Expression>
