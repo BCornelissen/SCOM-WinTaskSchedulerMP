@@ -4,7 +4,7 @@
       <DisplayStrings>
         <DisplayString ElementID="Custom.Windows.TaskScheduler.Windows2008.QuickStartOR">
           <Name>Windows Task Scheduler and PS Job Monitoring - Quick Start Overrides</Name>
-          <Description>Enables the discovery of Scheduled Tasks and PS Scheduled Jobs on Windows Server 2008 - 2016.</Description>
+          <Description>Enables the discovery of Scheduled Tasks and PS Scheduled Jobs on Windows Server 2008 and Higher.</Description>
         </DisplayString>
       </DisplayStrings>
     </LanguagePack>

@@ -3,8 +3,8 @@
     <LanguagePack ID="ENU" IsDefault="true">
       <DisplayStrings>
         <DisplayString ElementID="Custom.Windows.TaskScheduler.Windows2008.Monitoring">
-          <Name><![CDATA[Windows Task Scheduler and PS Job Monitoring - Windows Server 2008 / 2008 R2 / 2012 / 2012 R2 / 2016]]></Name>
-          <Description>Discovers and monitors the health of Windows 2008 - 2016 server based scheduled tasks and PowerShell scheduled jobs.</Description>
+          <Name><![CDATA[Windows Task Scheduler and PS Job Monitoring - Windows Server 2008 and Higher]]></Name>
+          <Description>Discovers and monitors the health of Windows Server 2008 and Higher scheduled tasks and PowerShell scheduled jobs.</Description>
         </DisplayString>
       </DisplayStrings>
     </LanguagePack>

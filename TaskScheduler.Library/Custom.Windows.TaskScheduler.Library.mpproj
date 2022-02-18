@@ -6,7 +6,7 @@
     <RootNamespace>Custom.Windows.TaskScheduler.Library</RootNamespace>
     <Name>Windows Task Scheduler Library</Name>
     <ManagementPackName>Custom.Windows.TaskScheduler.Library</ManagementPackName>
-    <Version>1.2.0.500</Version>
+    <Version>1.2.2.8</Version>
     <MpFrameworkVersion>v7.0</MpFrameworkVersion>
     <MpFrameworkProfile>OM</MpFrameworkProfile>
     <ProductVersion>1.1.0.0</ProductVersion>
@@ -15,10 +15,10 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
     <GenerateSealed>True</GenerateSealed>
-    <Company>Raphael Burri</Company>
+    <Company>Raphael Burri and TopQore</Company>
     <Copyright>Copyright (c) Raphael Burri. All rights reserved.</Copyright>
     <DelaySigning>False</DelaySigning>
-    <AssemblyOriginatorKeyFile>..\_signing\Custom_Raphael_Burri.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>C:\Users\Sai\TopQore\TopQore All Team - General\InternalIT\MPsigningkey\Custom_Raphael_Burri.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
